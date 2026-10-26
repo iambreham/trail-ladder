@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>100K · Trail Ladder</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="100K Trail">
+<meta name="theme-color" content="#F4EEDF">
+<link rel="apple-touch-icon" href="__ICON180__">
+<link rel="icon" type="image/png" href="__ICON180__">
+<link rel="manifest" href="__MANIFEST__">
+<style>
+:root{--matcha:#7C9A4E;--matcha-d:#56702F;--matcha-l:#DCE5C6;--denim:#3B5B85;--denim-d:#243B5C;--denim-l:#D5DFEC;--orange:#E8772E;--orange-l:#F8D9C2;--paper:#F4EEDF;--card:#FBF8F0;--ink:#1E2419;--ink2:#4F5547;--ink3:#8A8C80;--rule:#DCD4C0;
+--serif:"Iowan Old Style","Charter","Palatino Linotype",Palatino,Georgia,serif;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+body{padding:env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 24px)}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px}
+.mast{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:6px;flex-wrap:wrap;gap:4px}
+.kicker{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink2);font-weight:600}
+h1{font-family:var(--serif);font-weight:700;font-size:34px;line-height:1.02;margin:14px 0 4px;letter-spacing:-.01em}
+h1 em{font-style:italic;color:var(--matcha-d)}
+.dek{font-family:var(--serif);font-size:16px;color:var(--ink2);margin:0 0 14px;line-height:1.35}
+.hero{display:grid;grid-template-columns:1.35fr 1fr;gap:12px;align-items:end;margin:8px 0 6px}
+.big{font-family:var(--serif);font-size:62px;line-height:.9;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.big small{display:block;font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);font-weight:600;margin-top:8px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px}
+.stat b{display:block;font-family:var(--serif);font-size:24px;line-height:1;font-variant-numeric:tabular-nums}
+.stat span{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);font-weight:600}
+.bar{position:relative;height:14px;border-radius:7px;background:var(--rule);overflow:hidden;margin:14px 0 4px}
+.bar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--matcha),var(--denim) 60%,var(--orange));border-radius:7px;transition:width .8s}
+.bar u{position:absolute;top:0;bottom:0;width:2px;background:var(--ink);opacity:.55}
+.barlbl{display:flex;justify-content:space-between;font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.pace{margin:14px 0;border-radius:14px;padding:12px 14px;display:flex;gap:12px;align-items:center}
+.pace.ahead{background:var(--matcha-l)}.pace.behind{background:var(--orange-l)}.pace.neutral{background:var(--denim-l)}
+.pace .pv{font-family:var(--serif);font-size:26px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pace p{margin:0;font-size:13.5px;line-height:1.35;color:var(--ink)}
+.where{background:var(--card);border:1px solid var(--rule);border-radius:16px;padding:14px;margin:12px 0}
+.where .tr{font-family:var(--serif);font-size:21px;font-weight:700;margin:2px 0 8px}
+.where .row{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px dashed var(--rule);font-size:14px}
+.where .row:first-of-type{border-top:0}
+.dot{flex:0 0 10px;height:10px;border-radius:50%;margin-top:4px}
+.where .row b{font-weight:650}
+.where .row span{color:var(--ink2)}
+h2{font-family:var(--serif);font-size:22px;margin:26px 0 4px;font-weight:700}
+.sub{font-size:12.5px;color:var(--ink3);margin:0 0 10px}
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:18px;margin:12px 0;overflow:hidden;position:relative}
+.panel header{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 14px 0;gap:8px}
+.panel .no{font-family:var(--serif);font-style:italic;color:var(--ink3);font-size:13px}
+.panel h3{margin:0;font-family:var(--serif);font-size:19px;line-height:1.1}
+.panel .meta{font-size:11.5px;color:var(--ink2);margin-top:3px}
+.tag{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:4px 8px;border-radius:20px;white-space:nowrap}
+.tag.done{background:var(--matcha);color:#fff}.tag.now{background:var(--orange);color:#fff}.tag.next{background:var(--denim-l);color:var(--denim-d)}
+.panel svg{display:block;width:100%;height:auto}
+.panel .pbar{height:5px;background:var(--rule)}.panel .pbar i{display:block;height:100%;background:var(--orange)}
+.panel.done .pbar i{background:var(--matcha)}
+.stamp{position:absolute;right:14px;bottom:18px;transform:rotate(-8deg);border:2px solid var(--matcha-d);color:var(--matcha-d);font-family:var(--serif);font-weight:700;font-size:13px;padding:3px 8px;border-radius:6px;letter-spacing:.06em;background:rgba(251,248,240,.85)}
+table{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
+td,th{padding:8px 4px;border-bottom:1px solid var(--rule);text-align:right}
+th{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);font-weight:600}
+td:first-child,th:first-child{text-align:left}
+tr.hit td{color:var(--matcha-d)} tr.miss td{color:#B4541A} tr.cur td{font-weight:700}
+.ok{color:var(--matcha-d);font-weight:700}.no-{color:#B4541A;font-weight:700}
+.foot{margin-top:22px;font-size:12px;color:var(--ink3);line-height:1.5;border-top:1px solid var(--rule);padding-top:10px}
+.foot b{color:var(--ink2)}
+.note{font-size:12.5px;background:var(--denim-l);color:var(--denim-d);border-radius:10px;padding:8px 10px;margin:10px 0}
+.err{background:var(--orange-l);color:#7A3410}
+.lm{font-family:var(--sans);font-size:9.5px;fill:var(--ink2)}
+.lm.passed{fill:var(--ink)}
+.done-list{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chip{font-size:11.5px;padding:3px 9px;border-radius:20px;background:var(--matcha-l);color:var(--matcha-d);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="mast"><span class="kicker">The Trail Ladder</span><span class="kicker" id="today">Wed · Oct 28</span></div>
+  <h1>100,000 steps, <em>four trails</em>, one very long day.</h1>
+  <p class="dek">Zion's river, Angels Landing, Half Dome and the Inca Trail to the Sun Gate, walked one step at a time.</p>
+  <div id="notes"></div>
+  <div class="hero">
+    <div class="big" id="steps">0<small>steps today</small></div>
+    <div class="stats">
+      <div class="stat"><b id="miles">0.0</b><span>miles</span></div>
+      <div class="stat"><b id="pct">0%</b><span>of 100K</span></div>
+      <div class="stat"><b id="left">100,000</b><span>steps to go</span></div>
+      <div class="stat"><b id="trailsDone">0/4</b><span>trails done</span></div>
+    </div>
+  </div>
+  <div class="bar"><i id="barfill" style="width:0"></i><u id="barpace" style="left:0"></u></div>
+  <div class="barlbl"><span>0</span><span id="barpacelbl">pace</span><span>100K</span></div>
+  <div class="pace neutral" id="pace"><div class="pv" id="paceval">—</div><p id="pacetxt">Waiting for the first steps.</p></div>
+  <div class="where" id="where"></div>
+  <h2>The map</h2>
+  <p class="sub">One panel per trail. The orange marker is you.</p>
+  <div id="panels"></div>
+  <h2>Checkpoints</h2>
+  <p class="sub">Targets for the day, Eastern Time. The 1 PM check is the bail-out: under 50K means stop.</p>
+  <table id="cps"></table>
+  <h2>Updates</h2>
+  <p class="sub">Every step count the Shortcut has sent today. Health can lag, so the app keeps the highest number.</p>
+  <table id="hist"></table>
+  <div class="foot" id="foot"></div>
+</div>
+<script>
+const TOPIC="__TOPIC__";
+const SPM=2100, GOAL=100000, TOTAL_MI=47.8, MAX_STEPS=150000;
+const TZ="America/New_York";
+const TRAILS=[
+ {name:"Riverside Walk",park:"Zion National Park, Utah",start:0,end:2.2,col:"var(--denim)",lms:[["Temple of Sinawava",0,0,-10,"start"],["End of pavement · the Narrows",1.1,0,18,"middle"]],
+  prof:[[0,.30],[.15,.34],[.3,.28],[.45,.36],[.5,.40],[.55,.36],[.7,.29],[.85,.33],[1,.30]],sky:[[0,.85],[.1,.95],[.2,.88],[.35,.97],[.5,.92],[.65,.98],[.8,.9],[1,.96]]},
+ {name:"Angels Landing",park:"Zion National Park, Utah",start:2.2,end:7.6,col:"var(--orange)",lms:[["The Grotto",2.2,0,-10,"start"],["Scout Lookout",4.45,-8,4,"end"],["Angels Landing summit",4.9,0,-10,"middle"],["Scout Lookout (down)",5.35,8,4,"start"]],
+  prof:[[0,.12],[.12,.2],[.2,.42],[.26,.38],[.3,.52],[.34,.48],[.38,.6],[.417,.66],[.46,.8],[.5,.9],[.54,.8],[.583,.66],[.62,.6],[.66,.48],[.7,.52],[.74,.38],[.8,.42],[.88,.2],[1,.12]],sky:[[0,.3],[.25,.55],[.45,.92],[.5,.97],[.55,.92],[.75,.55],[1,.3]]},
+ {name:"Half Dome",park:"Yosemite · Mist Trail",start:7.6,end:21.8,col:"var(--matcha)",lms:[["Happy Isles",7.6,0,16,"start"],["Vernal Fall Footbridge",8.4,7,13,"start"],["Top of Vernal Fall",8.8,9,5,"start"],["Top of Nevada Fall",10.3,-7,-5,"end"],["Little Yosemite Valley",11.3,4,-9,"start"],["Half Dome summit",14.7,0,-10,"middle"],["Nevada Fall (down)",19.1,0,-9,"middle"],["Footbridge (down)",21.0,0,16,"end"]],
+  prof:[[0,.08],[.056,.14],[.085,.26],[.19,.44],[.26,.46],[.38,.62],[.45,.74],[.5,.92],[.55,.74],[.62,.62],[.74,.46],[.81,.44],[.9,.22],[.944,.14],[1,.08]],sky:[[0,.4],[.3,.6],[.42,.9],[.47,.99],[.53,.99],[.6,.8],[.62,.6],[1,.45]]},
+ {name:"Inca Trail",park:"Peru · Km 82 to Machu Picchu",start:21.8,end:47.8,col:"var(--denim)",lms:[["Km 82 trailhead",21.8,0,-9,"start"],["Wayllabamba",29.3,0,16,"middle"],["Dead Woman's Pass",34.8,0,-10,"middle"],["Pacaymayo",36.1,4,16,"start"],["Wiñay Wayna",44.5,0,16,"middle"],["Sun Gate · Machu Picchu",47.8,0,-10,"end"]],
+  prof:[[0,.12],[.15,.2],[.288,.3],[.4,.62],[.5,.94],[.55,.62],[.62,.82],[.7,.66],[.76,.74],[.873,.36],[.94,.42],[1,.46]],sky:[[0,.5],[.15,.7],[.3,.62],[.5,.99],[.65,.8],[.8,.9],[1,.6]]}
+];
+const CPS=[[7,13000,""],[9,26000,""],[11,39000,""],[13,50000,"Bail-out check"],[15,63000,""],[17,74000,"Walking call with Jaime"],[19,85000,""],[21,100000,"Finish"]];
+const PACE_PTS=[[5,0],...CPS.map(c=>[c[0],c[1]])];
+const $=id=>document.getElementById(id);
+const fmt=n=>Math.round(n).toLocaleString("en-US");
+const etParts=d=>{const p={};new Intl.DateTimeFormat("en-US",{timeZone:TZ,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(d).forEach(x=>p[x.type]=x.value);return p};
+const etDate=d=>{const p=etParts(d);return p.year+"-"+p.month+"-"+p.day};
+const etHour=d=>{const p=etParts(d);return (+p.hour)+(+p.minute)/60};
+const etTime=d=>new Intl.DateTimeFormat("en-US",{timeZone:TZ,hour:"numeric",minute:"2-digit"}).format(d);
+const hLabel=h=>{const hh=h%12||12;return hh+(h<12?" AM":" PM")};
+function expectedAt(h){if(h<=5)return 0;if(h>=21)return GOAL;for(let i=1;i<PACE_PTS.length;i++){const[a,av]=PACE_PTS[i-1],[b,bv]=PACE_PTS[i];if(h<=b)return av+(bv-av)*(h-a)/(b-a)}return GOAL}
+function parseVal(msg){
+  if(msg==null)return {err:"empty"};let s=String(msg).trim();
+  if(/^reset$/i.test(s))return {reset:true};
+  try{const j=JSON.parse(s);if(j&&typeof j==="object"&&"steps" in j)s=String(j.steps)}catch(e){}
+  s=s.replace(/[,\s]/g,"");
+  if(!/^\d+(\.\d+)?$/.test(s))return {err:"not a number"};
+  const v=Math.round(parseFloat(s));
+  if(!isFinite(v)||v<0||v>MAX_STEPS)return {err:"out of range"};
+  return {v};
+}
+const LS="trail100k_"+TOPIC.slice(-6);
+let store={};try{store=JSON.parse(localStorage.getItem(LS)||"{}")}catch(e){store={}}
+let lastFetchOk=null,lastFetchErr=null;
+async function poll(){
+  try{
+    const r=await fetch("https://ntfy.sh/"+encodeURIComponent(TOPIC)+"/json?poll=1&since=all",{cache:"no-store"});
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    const txt=await r.text();
+    txt.split("\n").forEach(line=>{if(!line.trim())return;let m;try{m=JSON.parse(line)}catch(e){return}
+      if(m.event!=="message")return;store[m.id]={t:m.time,m:m.message}});
+    try{localStorage.setItem(LS,JSON.stringify(store))}catch(e){}
+    lastFetchOk=new Date();lastFetchErr=null;
+  }catch(e){lastFetchErr=String(e.message||e)}
+  render();
+}
+function dayData(now){
+  const today=etDate(now);
+  const msgs=Object.entries(store).map(([id,o])=>({id,t:o.t,m:o.m,d:new Date(o.t*1000)})).filter(x=>etDate(x.d)===today).sort((a,b)=>a.t-b.t);
+  let lastReset=-1;msgs.forEach((x,i)=>{x.p=parseVal(x.m);if(x.p.reset)lastReset=i});
+  const live=msgs.slice(lastReset+1);let max=0,maxAt=null;const hist=[];
+  live.forEach(x=>{if(x.p.err){hist.push({d:x.d,raw:x.m,err:x.p.err});return}
+    const prev=max;if(x.p.v>max){max=x.p.v;maxAt=x.d}hist.push({d:x.d,v:x.p.v,kept:x.p.v>=prev,best:max})});
+  return {steps:max,maxAt,hist,lastMsg:live.length?live[live.length-1].d:null};
+}
+function locate(mi){
+  let ti=TRAILS.findIndex(t=>mi<t.end);if(ti<0)ti=TRAILS.length;
+  return ti;
+}
+function smoothPath(pts){let d="M"+pts[0][0]+","+pts[0][1];for(let i=0;i<pts.length-1;i++){const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+  const c1=[p1[0]+(p2[0]-p0[0])/6,p1[1]+(p2[1]-p0[1])/6],c2=[p2[0]-(p3[0]-p1[0])/6,p2[1]-(p3[1]-p1[1])/6];
+  d+=" C"+c1[0].toFixed(1)+","+c1[1].toFixed(1)+" "+c2[0].toFixed(1)+","+c2[1].toFixed(1)+" "+p2[0].toFixed(1)+","+p2[1].toFixed(1)}return d}
+const W=340,H=176,PADX=16,TOP=34,BOT=150;
+const X=x=>PADX+x*(W-2*PADX),Y=y=>BOT-y*(BOT-TOP);
+function buildPanels(){
+  const host=$("panels");host.innerHTML="";
+  TRAILS.forEach((t,i)=>{
+    const el=document.createElement("div");el.className="panel";el.id="panel"+i;
+    const pts=t.prof.map(p=>[X(p[0]),Y(p[1])]);const sky=t.sky.map(p=>[X(p[0]),Y(p[1])]);
+    const ground=smoothPath(pts);
+    const ridge=["#C9D6E6","#F3D2BB","#D6E0C2","#C9D6E6"][i];
+    el.innerHTML=`<header><div><div class="no">Trail ${i+1} of 4</div><h3>${t.name}</h3><div class="meta">${t.park} · ${(t.end-t.start).toFixed(1)} mi · ladder mile ${t.start} to ${t.end}</div></div><span class="tag next" id="tag${i}">Up next</span></header>
+    <svg viewBox="0 0 ${W} ${H}" aria-label="${t.name} trail map">
+      <defs><linearGradient id="g${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${["#3B5B85","#E8772E","#7C9A4E","#3B5B85"][i]}" stop-opacity=".22"/><stop offset="1" stop-color="#FBF8F0" stop-opacity="0"/></linearGradient></defs>
+      <path d="M${X(0)},${Y(.2)} ${skyPathFrom(sky)} L${X(1)},${H} L${X(0)},${H} Z" fill="${ridge}" opacity=".7"/>
+      <path d="${ground} L${X(1)},${H} L${X(0)},${H} Z" fill="url(#g${i})"/>
+      <path id="trk${i}" d="${ground}" fill="none" stroke="#1E2419" stroke-opacity=".35" stroke-width="2" stroke-dasharray="3 4"/>
+      <path id="done${i}" d="${ground}" fill="none" stroke="${["#3B5B85","#E8772E","#56702F","#3B5B85"][i]}" stroke-width="4" stroke-linecap="round"/>
+      <g id="lms${i}"></g>
+      <g id="mk${i}" style="display:none"><circle r="11" fill="#E8772E" opacity=".25"><animate attributeName="r" values="8;14;8" dur="2.4s" repeatCount="indefinite"/></circle><circle r="6.5" fill="#E8772E" stroke="#fff" stroke-width="2.5"/></g>
+    </svg><div class="pbar"><i id="pb${i}" style="width:0"></i></div>`;
+    host.appendChild(el);
+    const trk=el.querySelector("#trk"+i),L=trk.getTotalLength();t._L=L;t._trk=trk;
+    const done=el.querySelector("#done"+i);done.style.strokeDasharray=L+" "+L;done.style.strokeDashoffset=L;t._done=done;
+    const g=el.querySelector("#lms"+i);
+    t.lms.forEach((lm,j)=>{const f=(lm[1]-t.start)/(t.end-t.start);const p=trk.getPointAtLength(Math.min(L,f*L));
+      const dx=lm[2]||0,dy=lm[3]||-10,anchor=lm[4]||"middle";const tx=p.x+dx,ty=p.y+dy;
+      g.insertAdjacentHTML("beforeend",`<circle cx="${p.x}" cy="${p.y}" r="3.6" fill="#FBF8F0" stroke="#1E2419" stroke-width="1.5" id="lmd${i}_${j}"/><text class="lm" id="lmt${i}_${j}" x="${tx}" y="${ty}" text-anchor="${anchor}">${shortName(lm[0])}</text>`)});
+  });
+}
+function skyPathFrom(sky){return smoothPath(sky).replace(/^M[^ ]+/,"L"+sky[0][0]+","+sky[0][1])}
+function shortName(s){return s.replace("End of pavement · the Narrows","Narrows").replace(" summit"," ▲").replace("Vernal Fall Footbridge","Footbridge").replace("Top of Vernal Fall","Vernal Fall").replace("Top of Nevada Fall","Nevada Fall").replace("Little Yosemite Valley","Little Yosemite").replace("Temple of Sinawava","Sinawava").replace("Km 82 trailhead","Km 82").replace("Sun Gate · Machu Picchu","Sun Gate").replace(" (down)"," ↓").replace("Scout Lookout","Scout Lookout").replace("Dead Woman's Pass","Dead Woman's Pass ▲")}
+function allLms(){const a=[];TRAILS.forEach((t,i)=>t.lms.forEach(l=>a.push({name:l[0],mi:l[1],ti:i})));return a}
+function render(){
+  const now=new Date();const {steps,maxAt,hist,lastMsg}=dayData(now);
+  const mi=Math.min(TOTAL_MI,steps/SPM);const pct=steps/GOAL*100;const h=etHour(now);
+  $("today").textContent=new Intl.DateTimeFormat("en-US",{timeZone:TZ,weekday:"short",month:"short",day:"numeric"}).format(now).replace(","," ·");
+  $("steps").firstChild.nodeValue=fmt(steps);$("miles").textContent=mi.toFixed(1);$("pct").textContent=(pct>=10?Math.floor(pct):pct.toFixed(1))+"%";
+  $("left").textContent=fmt(Math.max(0,GOAL-steps));
+  const nDone=TRAILS.filter(t=>mi>=t.end-1e-9).length;$("trailsDone").textContent=nDone+"/4";
+  $("barfill").style.width=Math.min(100,pct)+"%";const exp=expectedAt(h);$("barpace").style.left=Math.min(100,exp/GOAL*100)+"%";$("barpacelbl").textContent="pace now: "+fmt(exp);
+  // pace
+  const pace=$("pace"),pv=$("paceval"),pt=$("pacetxt");const diff=steps-exp;
+  const nextCp=CPS.find(c=>c[0]>h);
+  if(h<5){pace.className="pace neutral";pv.textContent="5 AM";pt.textContent="Start line opens at 5 AM ET. First checkpoint: 13,000 by 7 AM.";}
+  else{
+    const ahead=diff>=0;pace.className="pace "+(ahead?"ahead":"behind");
+    pv.textContent=(ahead?"+":"−")+fmt(Math.abs(diff));
+    let s=ahead?"steps ahead of the checkpoint pace for "+etTime(now)+" ET.":"steps behind the checkpoint pace for "+etTime(now)+" ET.";
+    if(nextCp){const need=Math.max(0,nextCp[1]-steps);s+=need>0?" Next: "+fmt(nextCp[1])+" by "+hLabel(nextCp[0])+" ("+fmt(need)+" to go"+(nextCp[2]?", "+nextCp[2].toLowerCase():"")+").":" "+hLabel(nextCp[0])+" target ("+fmt(nextCp[1])+") already banked.";}
+    else s+=steps>=GOAL?" 100K done.":" The 9 PM finish has passed.";
+    if(h>=13&&steps<50000)s+=" Bail-out rule: under 50K at 1 PM means stop for the day.";
+    pt.textContent=s;
+  }
+  // where
+  const lms=allLms();const passed=lms.filter(l=>l.mi<=mi+1e-9);const last=passed[passed.length-1];const nxt=lms.find(l=>l.mi>mi+1e-9);
+  const ti=locate(mi);const cur=TRAILS[Math.min(ti,3)];
+  let w=`<div class="kicker">${ti>=4?"Finished":"Now on trail "+(ti+1)+" of 4"}</div><div class="tr">${ti>=4?"Sun Gate, Machu Picchu":cur.name}</div>`;
+  if(last)w+=`<div class="row"><span class="dot" style="background:var(--matcha)"></span><div><b>Passed: ${last.name}</b><br><span>mile ${last.mi.toFixed(1)} of the ladder</span></div></div>`;
+  if(nxt){const dm=nxt.mi-mi;w+=`<div class="row"><span class="dot" style="background:var(--orange)"></span><div><b>Next: ${nxt.name}</b><br><span>${dm.toFixed(1)} mi ahead, about ${fmt(dm*SPM)} steps</span></div></div>`}
+  const doneNames=TRAILS.filter(t=>mi>=t.end-1e-9).map(t=>t.name);
+  if(doneNames.length)w+=`<div class="row"><span class="dot" style="background:var(--denim)"></span><div><b>Trails completed</b><div class="done-list">${doneNames.map(n=>`<span class="chip">✓ ${n}</span>`).join("")}</div></div></div>`;
+  $("where").innerHTML=w;
+  // panels
+  TRAILS.forEach((t,i)=>{const len=t.end-t.start;const f=Math.max(0,Math.min(1,(mi-t.start)/len));
+    const st=mi>=t.end-1e-9?"done":(mi>=t.start&&mi<t.end?"now":"next");
+    const tag=$("tag"+i);tag.className="tag "+st;tag.textContent=st==="done"?"Done":(st==="now"?"On trail · "+Math.round(f*100)+"%":"Up next");
+    $("panel"+i).classList.toggle("done",st==="done");
+    let stamp=$("panel"+i).querySelector(".stamp");if(st==="done"&&!stamp){$("panel"+i).insertAdjacentHTML("beforeend",`<div class="stamp">${i===3?"SUN GATE ✓":(i===0?"WALKED ✓":"SUMMITED ✓")}</div>`)}if(st!=="done"&&stamp)stamp.remove();
+    $("pb"+i).style.width=(f*100)+"%";
+    t._done.style.strokeDashoffset=t._L*(1-f);
+    const mk=$("mk"+i);if(st==="now"||(i===3&&st==="done")||(i===0&&mi===0)){const p=t._trk.getPointAtLength(f*t._L);mk.setAttribute("transform","translate("+p.x+","+p.y+")");mk.style.display=""}else mk.style.display="none";
+    t.lms.forEach((lm,j)=>{const ok=lm[1]<=mi+1e-9;const d=$("lmd"+i+"_"+j);d.setAttribute("fill",ok?"#1E2419":"#FBF8F0");$("lmt"+i+"_"+j).setAttribute("class","lm"+(ok?" passed":""))});
+  });
+  // checkpoints
+  let cps="<tr><th>Time</th><th>Target</th><th>Status</th></tr><tr><td>5 AM</td><td>Start</td><td></td></tr>";
+  CPS.forEach(c=>{const past=h>=c[0];const hit=steps>=c[1];const isNext=nextCp&&nextCp[0]===c[0];
+    const status=hit?'<span class="ok">✓ made</span>':(past?'<span class="no-">missed</span>':(isNext?fmt(c[1]-steps)+" to go":""));
+    cps+=`<tr class="${hit?"hit":(past?"miss":"")} ${isNext?"cur":""}"><td>${hLabel(c[0])}${c[2]?'<br><span style="font-size:11px;color:var(--ink3);font-weight:400">'+c[2]+'</span>':""}</td><td>${fmt(c[1])}</td><td>${status}</td></tr>`});
+  $("cps").innerHTML=cps;
+  // history
+  const hr=hist.slice().reverse().slice(0,12);
+  $("hist").innerHTML=hr.length?"<tr><th>Received</th><th>Sent</th><th>Kept</th></tr>"+hr.map(x=>x.err?`<tr><td>${etTime(x.d)}</td><td>${String(x.raw).slice(0,14)}</td><td style="color:#B4541A">ignored (${x.err})</td></tr>`:`<tr><td>${etTime(x.d)}</td><td>${fmt(x.v)}</td><td>${fmt(x.best)}${x.kept?"":' <span style="color:var(--ink3)">(lower, Health lag)</span>'}</td></tr>`).join(""):"<tr><td style='color:var(--ink3)'>No step counts received yet today. Run the Shortcut to send the first one.</td></tr>";
+  // notes + foot
+  const notes=[];const dstr=etDate(now);
+  if(dstr<"2026-10-28")notes.push('<div class="note">Walk day is Wednesday, Oct 28. Starting at 5 AM ET. The page shows whatever is sent today, so a test run now will reset at midnight.</div>');
+  if(lastFetchErr)notes.push('<div class="note err">Couldn\'t reach the step feed ('+lastFetchErr+'). Showing the last saved numbers; retrying every minute.</div>');
+  $("notes").innerHTML=notes.join("");
+  $("foot").innerHTML=`<b>Last step update:</b> ${maxAt?etTime(maxAt)+" ET":"none yet today"}${lastMsg&&maxAt&&lastMsg>maxAt?" · last message "+etTime(lastMsg)+" ET":""}<br><b>Checked:</b> ${lastFetchOk?etTime(lastFetchOk)+" ET":"connecting…"} · refreshes every minute<br>Miles use about ${fmt(SPM)} steps per mile, an estimate. The full ladder is ${TOTAL_MI} mi, so 100K lands just before the Sun Gate.`;
+}
+buildPanels();render();poll();setInterval(poll,60000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)poll()});
+</script>
+</body>
+</html>
