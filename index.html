@@ -112,7 +112,7 @@ tr.hit td{color:var(--matcha-d)} tr.miss td{color:#B4541A} tr.cur td{font-weight
   <table id="hist"></table>
   <details class="setup" id="setup">
     <summary>Shortcut setup</summary>
-    <textarea id="puburl" class="urlfield" readonly rows="3" wrap="soft" spellcheck="false" aria-label="Publish URL"></textarea>
+    <textarea id="puburl" class="urlfield" readonly rows="1" wrap="soft" spellcheck="false" aria-label="Publish URL"></textarea>
     <button type="button" id="copyurl">Copy URL</button>
     <ol>
       <li>In your step Shortcut, after Calculate Statistics (Sum), add "Get Contents of URL".</li>
@@ -281,9 +281,14 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden)poll()});
 const pubUrl="https://ntfy.sh/"+encodeURIComponent(TOPIC)+"/publish?message=";
 const pubField=$("puburl");
 pubField.value=pubUrl;
-function fitPub(){pubField.style.height="auto";pubField.style.height=pubField.scrollHeight+"px"}
+function fitPub(){
+  pubField.style.height="0px";
+  const border=pubField.offsetHeight-pubField.clientHeight;
+  pubField.style.height=(pubField.scrollHeight+border)+"px";
+}
 const setupEl=$("setup");
 setupEl.addEventListener("toggle",()=>{if(setupEl.open)requestAnimationFrame(fitPub)});
+window.addEventListener("resize",()=>{if(setupEl.open)fitPub()});
 let copyTimer=0;
 $("copyurl").addEventListener("click",async()=>{
   const btn=$("copyurl");
