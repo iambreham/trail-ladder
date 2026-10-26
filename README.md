@@ -1,1 +1,1 @@
-# trail-ladder
+Trail Ladder: a virtual 100K-steps trail ladder (Zion Riverside Walk, Angels Landing, Half Dome via Mist Trail, Inca Trail). Static single-file web app; steps arrive from an iPhone Shortcut via ntfy.sh. Deploy: connect this repo to Netlify, publish directory '.', no build command.
