@@ -72,6 +72,14 @@ tr.hit td{color:var(--matcha-d)} tr.miss td{color:#B4541A} tr.cur td{font-weight
 .lm.passed{fill:var(--ink)}
 .done-list{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .chip{font-size:11.5px;padding:3px 9px;border-radius:20px;background:var(--matcha-l);color:var(--matcha-d);font-weight:600}
+.setup{background:var(--card);border:1px solid var(--rule);border-radius:16px;margin:18px 0 0;padding:12px 14px}
+.setup summary{cursor:pointer;font-family:var(--serif);font-weight:700;font-size:22px;line-height:1.15;color:var(--ink)}
+.setup summary:focus-visible{outline:2px solid var(--denim);outline-offset:3px;border-radius:4px}
+.setup .urlfield{display:block;width:100%;margin:10px 0 0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.45;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:8px 10px;resize:none;overflow:hidden;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-all}
+.setup #copyurl{margin-top:8px;font-family:var(--sans);font-size:13px;font-weight:650;color:#fff;background:var(--denim);border:0;border-radius:20px;padding:8px 14px;cursor:pointer}
+.setup #copyurl:focus-visible{outline:2px solid var(--denim-d);outline-offset:2px}
+.setup ol{margin:12px 0 0;padding-left:1.25em;color:var(--ink2);font-size:13.5px;line-height:1.45}
+.setup li{margin:6px 0}
 </style>
 </head>
 <body>
@@ -102,6 +110,17 @@ tr.hit td{color:var(--matcha-d)} tr.miss td{color:#B4541A} tr.cur td{font-weight
   <h2>Updates</h2>
   <p class="sub">Every step count the Shortcut has sent today. Health can lag, so the app keeps the highest number.</p>
   <table id="hist"></table>
+  <details class="setup" id="setup">
+    <summary>Shortcut setup</summary>
+    <textarea id="puburl" class="urlfield" readonly rows="3" wrap="soft" spellcheck="false" aria-label="Publish URL"></textarea>
+    <button type="button" id="copyurl">Copy URL</button>
+    <ol>
+      <li>In your step Shortcut, after Calculate Statistics (Sum), add "Get Contents of URL".</li>
+      <li>Paste this URL, then tap at the end and insert the Statistics variable.</li>
+      <li>Method: GET.</li>
+      <li>In the Automation, turn off Ask Before Running.</li>
+    </ol>
+  </details>
   <div class="foot" id="foot"></div>
 </div>
 <script>
@@ -259,6 +278,32 @@ function render(){
 }
 buildPanels();render();poll();setInterval(poll,60000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)poll()});
+const pubUrl="https://ntfy.sh/"+encodeURIComponent(TOPIC)+"/publish?message=";
+const pubField=$("puburl");
+pubField.value=pubUrl;
+function fitPub(){pubField.style.height="auto";pubField.style.height=pubField.scrollHeight+"px"}
+const setupEl=$("setup");
+setupEl.addEventListener("toggle",()=>{if(setupEl.open)requestAnimationFrame(fitPub)});
+let copyTimer=0;
+$("copyurl").addEventListener("click",async()=>{
+  const btn=$("copyurl");
+  let ok=false;
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(pubUrl);ok=true}
+  }catch(e){}
+  if(!ok){
+    const ta=document.createElement("textarea");
+    ta.value=pubUrl;ta.setAttribute("readonly","");
+    ta.style.position="fixed";ta.style.left="-9999px";
+    document.body.appendChild(ta);ta.focus();ta.select();
+    try{ok=document.execCommand("copy")}catch(e){}
+    ta.remove();
+  }
+  if(!ok)return;
+  btn.textContent="Copied";
+  clearTimeout(copyTimer);
+  copyTimer=setTimeout(()=>{btn.textContent="Copy URL"},2000);
+});
 </script>
 </body>
 </html>
