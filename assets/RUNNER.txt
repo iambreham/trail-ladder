@@ -1,0 +1,4 @@
+Female Tank Top, from the Animated Women pack by Quaternius (February 2019).
+Source: https://quaternius.com/packs/animatedwomen.html
+License: CC0 1.0 Universal — https://creativecommons.org/publicdomain/zero/1.0/
+The file runner.glb keeps the pack's Run and Idle clips. The Race tab uses this one mesh for all three runners.

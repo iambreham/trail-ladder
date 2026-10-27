@@ -12,6 +12,9 @@
 <link rel="apple-touch-icon" href="__ICON180__">
 <link rel="icon" type="image/png" href="__ICON180__">
 <link rel="manifest" href="__MANIFEST__">
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
+</script>
 <style>
 :root{--matcha:#7C9A4E;--matcha-d:#56702F;--matcha-l:#DCE5C6;--denim:#3B5B85;--denim-d:#243B5C;--denim-l:#D5DFEC;--orange:#E8772E;--orange-l:#F8D9C2;--paper:#F4EEDF;--card:#FBF8F0;--ink:#1E2419;--ink2:#4F5547;--ink3:#8A8C80;--rule:#DCD4C0;
 --serif:"Iowan Old Style","Charter","Palatino Linotype",Palatino,Georgia,serif;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;}
@@ -118,7 +121,7 @@ body.mode-ladder #viewrace{display:none}
 .racelegend b{margin-left:auto;font-family:var(--serif);font-size:18px;font-variant-numeric:tabular-nums;font-weight:700}
 .sw{width:12px;height:12px;border-radius:50%;display:block;flex:0 0 12px}
 .sw.you{background:var(--orange)}
-.sw.pace{background:var(--denim)}
+.sw.swpace{background:var(--denim)}
 .sw.last{background:#D0D1C8;box-shadow:inset 0 0 0 1.5px #8A8C80}
 .ratebox{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--rule)}
 .ratehint{margin:3px 0 0;max-width:220px;font-size:12px;line-height:1.35;color:var(--ink3)}
@@ -147,6 +150,15 @@ body.mode-ladder #viewrace{display:none}
 @media (prefers-reduced-motion:reduce){
   .runner.run .leg,.runner.run .arm,.runner.run .bob,.runner.run .pony{animation:none}
 }
+
+.racestage{position:relative}
+#race-gl{position:absolute;inset:0;width:100%;height:100%;display:none;touch-action:none}
+#race-flat{min-height:100%}
+body.stage-3d #race-gl{display:block}
+body.stage-3d #race-flat{display:none}
+body.stage-3d .racestage{overflow:hidden;touch-action:none;background:#D5DFEC}
+#race-recenter{position:absolute;z-index:3;top:10px;right:10px;min-height:44px;padding:8px 14px;border:1px solid var(--ink);border-radius:999px;background:var(--card);color:var(--ink);font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer;touch-action:manipulation}
+#race-recenter:focus-visible{outline:2px solid var(--denim);outline-offset:2px}
 </style>
 </head>
 <body>
@@ -161,7 +173,9 @@ body.mode-ladder #viewrace{display:none}
 </div>
 <div id="viewrace" role="tabpanel" aria-labelledby="tabrace">
   <div class="racestage" id="racestage">
-    <svg id="race-svg" viewBox="0 0 360 960" aria-hidden="true"></svg>
+    <button type="button" id="race-recenter" hidden>Recenter</button>
+    <canvas id="race-gl" hidden></canvas>
+    <div id="race-flat"><svg id="race-svg" viewBox="0 0 360 960" aria-hidden="true"></svg></div>
   </div>
   <div class="racecard">
     <div class="racehead">
@@ -180,7 +194,7 @@ body.mode-ladder #viewrace{display:none}
     </div>
     <ul class="racelegend">
       <li><i class="sw you"></i><span>You</span><b id="race-you-n">0</b></li>
-      <li><i class="sw pace"></i><span>Pace</span><b id="race-pace-n">0</b></li>
+      <li><i class="sw swpace"></i><span>Pace</span><b id="race-pace-n">0</b></li>
       <li><i class="sw last"></i><span>Last chance</span><b id="race-last-n">0</b></li>
     </ul>
     <div class="ratebox">
@@ -502,7 +516,12 @@ function publish(){
     vsPace:$("race-vs-pace").textContent,
     vsLast:$("race-vs-last").textContent,
     kicker:$("race-kicker").textContent,
-    clock:$("race-clock").textContent
+    clock:$("race-clock").textContent,
+    mode:document.body.classList.contains("stage-3d")?"3d":"2d",
+    anims:raceGL?raceGL.anims():null,
+    stride:raceGL?raceGL.stride():null,
+    world:raceGL?raceGL.world():null,
+    tris:raceGL?raceGL.tris():0
   };
 }
 function atFrac(frac){
@@ -532,6 +551,7 @@ function placeRunner(key){
   const s=g.getAttribute("data-face")==="-1"?-1:1;
   const sc=key==="you"?1.42:1.28;
   g.querySelector(".face").setAttribute("transform","scale("+(s*sc)+" "+sc+")");
+  if(raceGL) raceGL.place(key);
 }
 function settle(key){
   publish();
@@ -563,6 +583,7 @@ function moveTo(key, frac, ms){
   jobs[key]=requestAnimationFrame(step);
 }
 function frameRunners(retry){
+  if(document.body.classList.contains("stage-3d")) return;
   if(!course||!document.body.classList.contains("mode-race")) return;
   const stage=$("racestage"), svg=$("race-svg");
   const w=svg.clientWidth;
@@ -615,7 +636,8 @@ function setTab(which){
   $("tablad").setAttribute("aria-selected", race?"false":"true");
   $("viewrace").setAttribute("aria-hidden", race?"false":"true");
   $("viewladder").setAttribute("aria-hidden", race?"true":"false");
-  if(race) requestAnimationFrame(()=>frameRunners(false));
+  if(race){requestAnimationFrame(()=>frameRunners(false)); if(raceGL) raceGL.resume();}
+  else if(raceGL) raceGL.pause();
 }
 function runnerMarkup(kind){
   const you=kind==="you", pace=kind==="pace", ghost=kind==="last";
@@ -652,8 +674,8 @@ function buildCourse(){
     pts.push([Math.round(x*10)/10, Math.round(y*10)/10]);
   }
   const d=smoothPath(pts);
-  const stage=$("racestage");
-  stage.innerHTML=`<svg id="race-svg" viewBox="0 0 360 960"><path id="race-trail" d="${d}" fill="none"/></svg>`;
+  const flat=$("race-flat");
+  flat.innerHTML=`<svg id="race-svg" viewBox="0 0 360 960"><path id="race-trail" d="${d}" fill="none"/></svg>`;
   const trail=$("race-trail");
   const L=trail.getTotalLength();
   if(!(L>1)) throw new Error("course");
@@ -706,7 +728,7 @@ function buildCourse(){
     const dir=right?1:-1;
     bits.push(`<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><line x1="0" y1="10" x2="0" y2="-14" stroke="#243B5C" stroke-width="1.5" stroke-linecap="round"/><path d="M0,-14 L${11*dir},-10.5 L0,-7 Z" fill="#E8772E"/><text class="race-flag" text-anchor="${dir>0?"start":"end"}" x="${dir>0?13:-13}" y="-6">${f[1]}</text></g>`);
   });
-  stage.innerHTML=`<svg id="race-svg" viewBox="0 0 360 960" aria-hidden="true"><defs><linearGradient id="race-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D5DFEC"/><stop offset=".42" stop-color="#E7E4D8"/><stop offset=".72" stop-color="#F4EEDF"/><stop offset="1" stop-color="#E4EEF5"/></linearGradient></defs>
+  flat.innerHTML=`<svg id="race-svg" viewBox="0 0 360 960" aria-hidden="true"><defs><linearGradient id="race-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D5DFEC"/><stop offset=".42" stop-color="#E7E4D8"/><stop offset=".72" stop-color="#F4EEDF"/><stop offset="1" stop-color="#E4EEF5"/></linearGradient></defs>
   <rect width="360" height="960" fill="url(#race-sky)"/>
   <circle cx="292" cy="40" r="16" fill="#FBF8F0" stroke="#E8772E" stroke-width="3"/>
   <circle cx="292" cy="40" r="4.2" fill="#E8772E"/>
@@ -729,6 +751,436 @@ function buildCourse(){
   <g id="runners">${runnerMarkup("last")}${runnerMarkup("pace")}${runnerMarkup("you")}</g>
   </svg>`;
 }
+const RUNNER_URL="assets/runner.glb";
+const TRAIL_LEN=86;
+let raceGL=null;
+function terrainY(x,z){
+  return Math.sin(x*0.08)*0.55+Math.cos(z*0.16+0.6)*0.28+Math.sin(x*0.045+z*0.07)*0.38;
+}
+function trailXZ(t){
+  const u=Math.max(0,Math.min(1,t));
+  return [(u-0.5)*TRAIL_LEN, Math.sin(u*Math.PI*2.5)*11+Math.sin(u*Math.PI*5+0.4)*1.7];
+}
+function trailPoint(t, target){
+  const xz=trailXZ(t);
+  const y=terrainY(xz[0], xz[1]);
+  if(target){target.set(xz[0], y, xz[1]); return target}
+  return {x:xz[0], y:y, z:xz[1]};
+}
+function boot3d(){
+  const canvas=$("race-gl");
+  if(!canvas) return;
+  let THREE, GLTFLoader, OrbitControls, SkeletonUtils;
+  Promise.all([
+    import("three"),
+    import("three/addons/loaders/GLTFLoader.js"),
+    import("three/addons/controls/OrbitControls.js"),
+    import("three/addons/utils/SkeletonUtils.js")
+  ]).then(mods=>{
+    THREE=mods[0];
+    GLTFLoader=mods[1].GLTFLoader;
+    OrbitControls=mods[2].OrbitControls;
+    SkeletonUtils=mods[3].SkeletonUtils;
+    start3d(THREE, GLTFLoader, OrbitControls, SkeletonUtils, canvas);
+  }).catch(e=>{
+    console.warn("Race 3D unavailable, using the flat course.", e);
+  });
+}
+function start3d(THREE, GLTFLoader, OrbitControls, SkeletonUtils, canvas){
+  let renderer;
+  try{
+    renderer=new THREE.WebGLRenderer({canvas:canvas, antialias:true, alpha:false, powerPreference:"high-performance"});
+  }catch(e){
+    console.warn("Race 3D unavailable, using the flat course.", e);
+    return;
+  }
+  if(!renderer.getContext()){
+    console.warn("Race 3D unavailable, using the flat course.");
+    return;
+  }
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio||1));
+  renderer.outputColorSpace=THREE.SRGBColorSpace;
+  renderer.shadowMap.enabled=true;
+  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.setClearColor(0xD5DFEC, 1);
+  const scene=new THREE.Scene();
+  scene.fog=new THREE.Fog(0xD5DFEC, 22, 72);
+  const camera=new THREE.PerspectiveCamera(42, 1, 0.1, 160);
+  const controls=new OrbitControls(camera, canvas);
+  controls.enableDamping=true;
+  controls.enablePan=false;
+  controls.minDistance=2.4;
+  controls.maxDistance=16;
+  controls.maxPolarAngle=Math.PI*0.48;
+  controls.touches.ONE=0;
+  controls.touches.TWO=2;
+  let customOrbit=false;
+  controls.addEventListener("start",()=>{customOrbit=true});
+  scene.add(new THREE.HemisphereLight(0xF7F1E4, 0x6E8A48, 0.92));
+  scene.add(new THREE.AmbientLight(0xF4EEDF, 0.28));
+  const sun=new THREE.DirectionalLight(0xFFF6E8, 1.65);
+  sun.position.set(26, 34, 12);
+  sun.castShadow=true;
+  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.camera.near=0.5;
+  sun.shadow.camera.far=96;
+  sun.shadow.camera.left=-50;
+  sun.shadow.camera.right=50;
+  sun.shadow.camera.top=24;
+  sun.shadow.camera.bottom=-24;
+  sun.shadow.bias=-0.00035;
+  sun.shadow.normalBias=0.045;
+  scene.add(sun);
+  scene.add(sun.target);
+  const ground=buildTerrain(THREE);
+  scene.add(ground);
+  scene.add(buildRibbon(THREE));
+  buildMarkers(THREE, scene);
+  const runners={};
+  const clock=new THREE.Clock();
+  let loopOn=false, raf=0, ready=false;
+  const loader=new GLTFLoader();
+  loader.load(RUNNER_URL, gltf=>{
+    ["you","pace","last"].forEach(key=>{
+      runners[key]=makeRunner(THREE, SkeletonUtils, gltf, key);
+      scene.add(runners[key].pivot);
+    });
+    ready=true;
+    raceGL={ready:true, place:place3d, resume:resume, pause:pause, recenter:recenter, anims:anims, stride:stride, world:world, tris:()=>renderer.info.render.triangles};
+    window.raceGL=raceGL;
+    $("viewrace")._gl=raceGL;
+    document.body.classList.add("stage-3d");
+    canvas.hidden=false;
+    $("race-recenter").hidden=false;
+    ["you","pace","last"].forEach(place3d);
+    resize();
+    recenter();
+    resume();
+    publish();
+  }, undefined, e=>{
+    console.warn("Race 3D unavailable, using the flat course.", e);
+    dispose();
+  });
+  $("race-recenter").addEventListener("click",()=>{ if(raceGL) raceGL.recenter(); });
+  function dispose(){
+    pause();
+    try{renderer.dispose()}catch(err){}
+    raceGL=null;
+    window.raceGL=null;
+  }
+  function resize(){
+    const st=$("racestage");
+    const w=st.clientWidth, h=st.clientHeight;
+    if(!w||!h) return;
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio||1));
+    renderer.setSize(w, h, false);
+    camera.aspect=w/Math.max(1,h);
+    camera.updateProjectionMatrix();
+  }
+  function resume(){
+    if(!ready||loopOn) return;
+    if(document.hidden||!document.body.classList.contains("mode-race")) return;
+    loopOn=true;
+    clock.getDelta();
+    raf=requestAnimationFrame(tick);
+  }
+  function pause(){
+    loopOn=false;
+    if(raf) cancelAnimationFrame(raf);
+    raf=0;
+  }
+  function tick(){
+    if(!loopOn) return;
+    raf=requestAnimationFrame(tick);
+    const dt=Math.min(0.05, clock.getDelta());
+    ["you","pace","last"].forEach(key=>{
+      const r=runners[key];
+      if(!r) return;
+      const moving=wantsRun(key);
+      if(moving!==r.moving){
+        r.moving=moving;
+        const next=moving?r.run:r.idle, prev=moving?r.idle:r.run;
+        next.reset().fadeIn(0.18).play();
+        prev.fadeOut(0.18);
+      }
+      r.mixer.update(dt);
+    });
+    frameCam();
+    renderer.render(scene, camera);
+  }
+  function frameCam(){
+    const you=runners.you&&runners.you.pivot;
+    if(!you) return;
+    const target=new THREE.Vector3(you.position.x, you.position.y+1.15, you.position.z);
+    if(!customOrbit){
+      const yaw=you.rotation.y+0.72;
+      const pitch=0.4;
+      const dist=6.5;
+      const cp=Math.cos(pitch);
+      camera.position.set(target.x+Math.sin(yaw)*cp*dist, target.y+Math.sin(pitch)*dist, target.z+Math.cos(yaw)*cp*dist);
+      camera.lookAt(target);
+      controls.target.copy(target);
+    }else{
+      const off=camera.position.clone().sub(controls.target);
+      controls.target.copy(target);
+      camera.position.copy(target).add(off);
+      controls.update();
+    }
+  }
+  function recenter(){
+    customOrbit=false;
+    frameCam();
+  }
+  function place3d(key){
+    const r=runners[key];
+    if(!r) return;
+    const t=shown[key];
+    const p=new THREE.Vector3();
+    const q=new THREE.Vector3();
+    trailPoint(t, p);
+    trailPoint(Math.min(1, t+0.012), q);
+    const tangent=q.sub(p);
+    tangent.y=0;
+    if(tangent.lengthSq()<1e-8) tangent.set(1,0,0);
+    tangent.normalize();
+    const side=new THREE.Vector3(-tangent.z, 0, tangent.x);
+    const lateral=key==="you"?-0.62:key==="last"?0.62:0;
+    const pos=p.clone().add(side.multiplyScalar(lateral));
+    pos.y=terrainY(pos.x, pos.z);
+    r.pivot.position.copy(pos);
+    const look=pos.clone().add(tangent);
+    r.pivot.lookAt(look.x, pos.y, look.z);
+  }
+  function wantsRun(key){
+    if(reduced()) return false;
+    if(jobs[key]) return true;
+    if(!raceCur||raceCur.phase!=="live") return false;
+    if(key==="you") return false;
+    const steps=key==="pace"?raceCur.pace:raceCur.last;
+    return steps>1&&steps<GOAL-1;
+  }
+  function anims(){
+    const o={};
+    ["you","pace","last"].forEach(k=>{o[k]=runners[k]&&runners[k].moving?"run":"idle"});
+    return o;
+  }
+  function stride(){
+    const model=runners.pace&&runners.pace.model;
+    const bone=model&&model.getObjectByName("UpperLegL");
+    return bone?bone.quaternion.x:0;
+  }
+  function world(){
+    const o={};
+    ["you","pace","last"].forEach(key=>{
+      const t=shown[key];
+      const path=trailPoint(t);
+      const w=runners[key]?runners[key].pivot.position:{x:0,y:0,z:0};
+      o[key]={t:t, x:w.x, y:w.y, z:w.z, pathX:path.x, pathZ:path.z};
+    });
+    return o;
+  }
+  window.addEventListener("resize",()=>{ if(ready) resize(); });
+}
+function buildTerrain(THREE){
+  const geo=new THREE.PlaneGeometry(128, 46, 48, 18);
+  geo.rotateX(-Math.PI/2);
+  const pos=geo.attributes.position;
+  const colors=new Float32Array(pos.count*3);
+  const grass=new THREE.Color(0x8EAA62);
+  const moss=new THREE.Color(0xC9D4A4);
+  const soil=new THREE.Color(0xD7C4A2);
+  for(let i=0;i<pos.count;i++){
+    const x=pos.getX(i), z=pos.getZ(i);
+    const y=terrainY(x,z);
+    pos.setY(i, y);
+    const c=grass.clone().lerp(moss, Math.max(0, y)*0.45).lerp(soil, Math.max(0, -y)*0.35);
+    colors[i*3]=c.r; colors[i*3+1]=c.g; colors[i*3+2]=c.b;
+  }
+  geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+  geo.computeVertexNormals();
+  const mesh=new THREE.Mesh(geo, new THREE.MeshStandardMaterial({vertexColors:true, roughness:0.92, metalness:0}));
+  mesh.receiveShadow=true;
+  return mesh;
+}
+function buildRibbon(THREE){
+  const n=200, half=0.7;
+  const positions=[], colors=[], indices=[];
+  const seg=[[0,0x3B5B85],[2.2/TOTAL_MI,0xE8772E],[7.6/TOTAL_MI,0x7C9A4E],[21.8/TOTAL_MI,0x243B5C]];
+  const up=new THREE.Vector3(0,1,0);
+  const a=new THREE.Vector3(), b=new THREE.Vector3(), tan=new THREE.Vector3(), right=new THREE.Vector3();
+  function segColor(t){
+    let hex=seg[0][1];
+    for(let i=0;i<seg.length;i++) if(t+1e-6>=seg[i][0]) hex=seg[i][1];
+    return new THREE.Color(hex);
+  }
+  for(let i=0;i<=n;i++){
+    const t=i/n;
+    trailPoint(t, a);
+    trailPoint(Math.min(1, t+0.004), b);
+    tan.subVectors(b, a); tan.y=0;
+    if(tan.lengthSq()<1e-8) tan.set(1,0,0);
+    tan.normalize();
+    right.crossVectors(up, tan).normalize();
+    const col=segColor(t);
+    for(const s of [-1,1]){
+      positions.push(a.x+right.x*half*s, a.y+0.045, a.z+right.z*half*s);
+      colors.push(col.r, col.g, col.b);
+    }
+  }
+  for(let i=0;i<n;i++){
+    const o=i*2;
+    indices.push(o, o+1, o+2, o+1, o+3, o+2);
+  }
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geo.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+  geo.setIndex(indices);
+  geo.computeVertexNormals();
+  const mesh=new THREE.Mesh(geo, new THREE.MeshStandardMaterial({vertexColors:true, roughness:0.78, metalness:0, side:THREE.DoubleSide}));
+  mesh.receiveShadow=true;
+  return mesh;
+}
+function makeSprite(THREE, title, sub){
+  const c=document.createElement("canvas");
+  c.width=512; c.height=sub?168:112;
+  const g=c.getContext("2d");
+  g.fillStyle="rgba(251,248,240,0.94)";
+  roundBox(g, 8, 8, 496, c.height-16, 28);
+  g.fill();
+  g.lineWidth=8; g.strokeStyle="#1E2419"; g.stroke();
+  g.textAlign="center"; g.textBaseline="middle";
+  g.fillStyle="#1E2419";
+  g.font='700 58px Georgia, "Iowan Old Style", serif';
+  g.fillText(title, 256, sub?62:c.height/2);
+  if(sub){
+    g.font="650 32px -apple-system, Helvetica, sans-serif";
+    g.fillStyle="#4F5547";
+    g.fillText(sub, 256, 118);
+  }
+  const tex=new THREE.CanvasTexture(c);
+  tex.colorSpace=THREE.SRGBColorSpace;
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex, transparent:true, depthWrite:false}));
+  s.scale.set(sub?3.1:1.35, sub?1.02:0.36, 1);
+  return s;
+}
+function roundBox(g, x, y, w, h, r){
+  g.beginPath();
+  g.moveTo(x+r, y);
+  g.arcTo(x+w, y, x+w, y+h, r);
+  g.arcTo(x+w, y+h, x, y+h, r);
+  g.arcTo(x, y+h, x, y, r);
+  g.arcTo(x, y, x+w, y, r);
+  g.closePath();
+}
+function buildMarkers(THREE, scene){
+  const ink=new THREE.MeshStandardMaterial({color:0x243B5C, roughness:0.55});
+  const flagMat=new THREE.MeshStandardMaterial({color:0xE8772E, roughness:0.5, side:THREE.DoubleSide});
+  const labels=[
+    [0,"Riverside","2.2 mi · 4 AM"],
+    [4.9/TOTAL_MI,"Angels Landing","5.4 mi"],
+    [14.7/TOTAL_MI,"Half Dome","14.2 mi"],
+    [34.8/TOTAL_MI,"Inca Trail","26.0 mi"]
+  ];
+  labels.forEach(item=>{
+    const p=new THREE.Vector3();
+    trailPoint(item[0], p);
+    const s=makeSprite(THREE, item[1], item[2]);
+    s.position.set(p.x, p.y+2.15, p.z);
+    scene.add(s);
+  });
+  const gateP=new THREE.Vector3();
+  trailPoint(1, gateP);
+  const gate=new THREE.Group();
+  gate.position.copy(gateP);
+  const ahead=new THREE.Vector3();
+  trailPoint(0.99, ahead);
+  gate.lookAt(ahead.x, gateP.y, ahead.z);
+  [-0.72,0.72].forEach(x=>{
+    const post=new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.07, 1.85, 6), ink);
+    post.position.set(x, 0.92, 0);
+    post.castShadow=true;
+    gate.add(post);
+  });
+  const lintel=new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.1, 0.1), new THREE.MeshStandardMaterial({color:0xE8772E, roughness:0.45}));
+  lintel.position.y=1.8;
+  lintel.castShadow=true;
+  gate.add(lintel);
+  const gateLabel=makeSprite(THREE, "Sun Gate", "100K");
+  gateLabel.position.y=2.45;
+  gate.add(gateLabel);
+  scene.add(gate);
+  [[13000,"13K"],[26000,"26K"],[39000,"39K"],[50000,"50K"],[63000,"63K"],[74000,"74K"],[85000,"85K"],[100000,"100K"]].forEach(f=>{
+    const p=new THREE.Vector3(), q=new THREE.Vector3();
+    const t=stepsToFrac(f[0]);
+    trailPoint(t, p);
+    trailPoint(Math.min(1, t+0.01), q);
+    const tan=q.sub(p); tan.y=0; tan.normalize();
+    const side=new THREE.Vector3(-tan.z, 0, tan.x).multiplyScalar(1.15);
+    const g=new THREE.Group();
+    g.position.set(p.x+side.x, p.y, p.z+side.z);
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.03, 1.35, 5), ink);
+    pole.position.y=0.68;
+    pole.castShadow=true;
+    const pennant=new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.24), flagMat);
+    pennant.position.set(0.22, 1.22, 0);
+    g.add(pole); g.add(pennant);
+    const tag=makeSprite(THREE, f[1], "");
+    tag.scale.set(0.72, 0.22, 1);
+    tag.position.y=1.62;
+    g.add(tag);
+    scene.add(g);
+  });
+}
+function makeRunner(THREE, SkeletonUtils, gltf, key){
+  const model=SkeletonUtils.clone(gltf.scene);
+  model.traverse(o=>{
+    if(!o.isMesh) return;
+    o.frustumCulled=false;
+    const srcMat=Array.isArray(o.material)?o.material[0]:o.material;
+    if(key==="last"){
+      o.material=new THREE.MeshStandardMaterial({color:0xC5C7C0, transparent:true, opacity:0.42, roughness:0.28, metalness:0, depthWrite:false});
+      o.castShadow=false;
+    }else{
+      o.material=srcMat.clone();
+      if(key==="you"&&o.material.name==="Shirt") o.material.color.set(0xE8772E);
+      if(key==="pace"&&(o.material.name==="Shirt"||o.material.name==="Pants")) o.material.color.set(0x3B5B85);
+      o.castShadow=true;
+      o.receiveShadow=false;
+    }
+  });
+  model.rotation.y=Math.PI;
+  const pivot=new THREE.Group();
+  pivot.add(model);
+  const mixer=new THREE.AnimationMixer(model);
+  const idleClip=THREE.AnimationClip.findByName(gltf.animations, "Idle");
+  const runClip=THREE.AnimationClip.findByName(gltf.animations, "Run");
+  const idle=mixer.clipAction(idleClip);
+  const run=mixer.clipAction(runClip);
+  idle.play();
+  run.time=key==="pace"?0.12:key==="last"?0.46:0;
+  const tag=makeSprite(THREE, key==="you"?"You":key==="pace"?"Pace":"Last chance", "");
+  tag.position.y=2.02;
+  pivot.add(tag);
+  if(key==="you"){
+    const ring=new THREE.Mesh(
+      new THREE.RingGeometry(0.4, 0.62, 28),
+      new THREE.MeshBasicMaterial({color:0xE8772E, transparent:true, opacity:0.6, side:THREE.DoubleSide, depthWrite:false})
+    );
+    ring.rotation.x=-Math.PI/2;
+    ring.position.y=0.04;
+    pivot.add(ring);
+  }
+  if(key==="pace"){
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.025, 1.45, 5), new THREE.MeshStandardMaterial({color:0x243B5C, roughness:0.5}));
+    pole.position.set(0.48, 0.78, 0.15);
+    pole.castShadow=true;
+    const pennant=new THREE.Mesh(new THREE.PlaneGeometry(0.36, 0.22), new THREE.MeshStandardMaterial({color:0x7C9A4E, roughness:0.45, side:THREE.DoubleSide}));
+    pennant.position.set(0.66, 1.38, 0.15);
+    pivot.add(pole); pivot.add(pennant);
+  }
+  return {pivot:pivot, model:model, mixer:mixer, idle:idle, run:run, moving:false};
+}
+
 function initRace(){
   $("tabrace").addEventListener("click",()=>setTab("race"));
   $("tablad").addEventListener("click",()=>setTab("ladder"));
@@ -741,10 +1193,11 @@ function initRace(){
   setTab("race");
   paint("boot");
   setInterval(()=>{ if(raceReady) paint("tick"); }, 3000);
-  window.addEventListener("resize",()=>{ if(document.body.classList.contains("mode-race")) frameRunners(false); });
+  window.addEventListener("resize",()=>{ if(document.body.classList.contains("mode-race")&&!document.body.classList.contains("stage-3d")) frameRunners(false); });
+  boot3d();
 }
 buildPanels();render();poll();setInterval(poll,60000);
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)poll()});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)poll(); if(raceGL){ if(document.hidden) raceGL.pause(); else raceGL.resume(); }});
 const pubUrl="https://ntfy.sh/"+encodeURIComponent(TOPIC)+"/publish?message=";
 const pubField=$("puburl");
 pubField.value=pubUrl;
