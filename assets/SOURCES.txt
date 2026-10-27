@@ -1,0 +1,31 @@
+Race stage sources and licenses
+
+Characters
+- assets/michelle.glb — Mixamo character "Michelle", as shipped in three.js r170 examples.
+  https://github.com/mrdoob/three.js/blob/r170/examples/models/gltf/Michelle.glb
+- assets/soldier.glb — Mixamo character "Soldier" from the same examples. Only the Idle and Run clips are used. They are retargeted onto Michelle with three.js SkeletonUtils.retargetClip. The Soldier mesh is not shown.
+  https://github.com/mrdoob/three.js/blob/r170/examples/models/gltf/Soldier.glb
+- License: Mixamo (Adobe). Characters and animations may be used in a project, including this web app. They may not be resold or redistributed as a standalone asset.
+  https://www.mixamo.com/#/license
+- three.js itself is MIT: https://github.com/mrdoob/three.js/blob/r170/LICENSE
+
+Terrain
+- assets/terrain/*.bin and courses.json — elevation grids sampled from AWS Terrain Tiles (terrarium encoding).
+  https://registry.opendata.aws/terrain-tiles/
+  https://github.com/tilezen/joerd
+  The tiles package public elevation (mostly SRTM and USGS 3DEP).
+- Trail centerlines — OpenStreetMap ways used by the earlier map tab. ODbL.
+  https://www.openstreetmap.org/copyright
+
+Textures and sky (Poly Haven, CC0 1.0)
+- red_sandstone_wall — Zion and Angels ground (sandstone_diff.webp, sandstone_nor.webp)
+- worn_asphalt — Riverside paved path
+- rocky_terrain — Half Dome granite
+- forest_ground_04 — Inca forest floor
+- stone_pathway_02 — Inca stone steps and the Sun Gate
+- pine_bark — tree trunks
+- kloofendal_48d_partly_cloudy_puresky — 1K HDRI sky and environment light (sky.hdr)
+https://polyhaven.com/license
+https://creativecommons.org/publicdomain/zero/1.0/
+
+The 1K downloads were resized to WebP. A KTX2/Basis encoder was not available in this environment, so the maps are WebP rather than KTX2. Trees, cottonwoods, and rocks are instanced meshes shaded with those CC0 maps, not scanned plant models. Photogrammetry vegetation did not fit the asset budget.

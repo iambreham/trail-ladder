@@ -12,6 +12,9 @@
 <link rel="apple-touch-icon" href="__ICON180__">
 <link rel="icon" type="image/png" href="__ICON180__">
 <link rel="manifest" href="__MANIFEST__">
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
+</script>
 <style>
 :root{--matcha:#7C9A4E;--matcha-d:#56702F;--matcha-l:#DCE5C6;--denim:#3B5B85;--denim-d:#243B5C;--denim-l:#D5DFEC;--orange:#E8772E;--orange-l:#F8D9C2;--paper:#F4EEDF;--card:#FBF8F0;--ink:#1E2419;--ink2:#4F5547;--ink3:#8A8C80;--rule:#DCD4C0;
 --serif:"Iowan Old Style","Charter","Palatino Linotype",Palatino,Georgia,serif;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;}
@@ -86,71 +89,138 @@ body{padding-top:0}
 .tabs{display:flex;background:var(--card);border:1px solid var(--rule);border-radius:999px;padding:3px;gap:2px}
 .tab{border:0;background:transparent;font-family:var(--sans);font-weight:700;font-size:13px;color:var(--ink2);padding:6px 12px;border-radius:999px;cursor:pointer}
 .tab.on{background:var(--ink);color:var(--paper)}
-.tab:focus-visible,.tchip:focus-visible,#flybtn:focus-visible{outline:2px solid var(--denim);outline-offset:2px}
+.tab:focus-visible,.stepper button:focus-visible,#copyurl:focus-visible{outline:2px solid var(--denim);outline-offset:2px}
 .tab:disabled{opacity:.4;cursor:default}
-#view3d{display:none}
-body.mode-map{padding:0;overflow:hidden;height:100dvh}
-body.mode-map .tabbar{position:fixed;left:0;right:0;top:0}
-body.mode-map #viewladder{display:none}
-body.mode-map #view3d{display:block;position:fixed;inset:0;background:#D5DFEC}
-#map{position:absolute;inset:0}
-.maphud{position:absolute;left:0;right:0;bottom:0;z-index:4;padding:0 12px calc(env(safe-area-inset-bottom) + 10px);display:flex;flex-direction:column;align-items:center;pointer-events:none}
-.maphud .mapcard,.maphud .mapchips,.maphud #flybtn{pointer-events:auto}
-.mapcard{width:min(560px,100%);background:rgba(251,248,240,.94);border:1px solid var(--rule);border-radius:16px;padding:12px 14px 10px;box-shadow:0 8px 28px rgba(30,36,25,.16)}
-.mapcard h2{margin:1px 0 8px;font-size:26px;line-height:1.05}
-.mapmeta{display:flex;gap:18px}
-.mapmeta b{display:block;font-family:var(--serif);font-size:22px;line-height:1;font-variant-numeric:tabular-nums}
-.mapmeta span{display:block;margin-top:4px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);font-weight:600}
-.mapnext{margin:8px 0 0;font-size:14px;line-height:1.35;color:var(--ink)}
-.fine{margin:8px 0 0;font-size:10px;line-height:1.35;color:var(--ink3)}
-.mapchips{width:min(560px,100%);display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.tchip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--rule);background:var(--card);color:var(--ink2);border-radius:999px;padding:5px 10px;font-family:var(--sans);font-size:12px;font-weight:650;cursor:pointer}
-.tchip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.tchip.done{background:var(--matcha-l);color:var(--matcha-d);border-color:transparent}
-.tchip.done.on{background:var(--matcha-d);color:#fff}
-.tchip.lock{color:var(--ink3)}
-.tchip .locksvg{display:block}
-#flybtn{margin-top:8px;font-family:var(--sans);font-size:13px;font-weight:700;color:#fff;background:var(--denim);border:0;border-radius:999px;padding:8px 16px;cursor:pointer}
-.you{width:22px;height:22px;display:grid;place-items:center}
-.you i{width:14px;height:14px;border-radius:50%;background:#E8772E;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(30,36,25,.35);position:relative}
-.you i:after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid #E8772E;animation:youpulse 2.2s ease-out infinite}
-@keyframes youpulse{0%{transform:scale(.5);opacity:.8}100%{transform:scale(1.45);opacity:0}}
-.lockpin{width:28px;height:28px;border-radius:50%;background:var(--denim-d);color:#fff;display:grid;place-items:center;border:2px solid #fff;box-shadow:0 1px 4px rgba(30,36,25,.35)}
-body.mode-map .maplibregl-ctrl-top-left,body.mode-map .maplibregl-ctrl-top-right{top:calc(env(safe-area-inset-top) + 58px)}
-.maplibregl-ctrl-attrib{font-size:10px;background:rgba(251,248,240,.9)}
-@media (prefers-reduced-motion:reduce){.you i:after{animation:none}}
+body.mode-race{display:flex;flex-direction:column;height:100dvh;overflow:hidden;padding-bottom:0}
+body.mode-race .tabbar{flex:0 0 auto;width:100%}
+body.mode-race #viewladder{display:none}
+body.mode-ladder #viewrace{display:none}
+#viewrace{display:flex;flex-direction:column;flex:1;min-height:0;width:min(560px,100%);align-self:center}
+.racestage{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;background:
+  linear-gradient(#D5DFEC,#F4EEDF 42%,#F4EEDF)}
+#race-svg{width:100%;height:auto;display:block}
+.race-label{font-family:var(--serif);font-weight:700;fill:var(--ink);font-size:13px}
+.race-sub{font-family:var(--sans);font-size:9px;letter-spacing:.08em;text-transform:uppercase;fill:var(--ink2);font-weight:650}
+.race-note{font-family:var(--sans);font-size:10px;font-weight:650;fill:var(--ink2)}
+.race-flag{font-family:var(--sans);font-size:9px;font-weight:700;fill:var(--denim-d)}
+.racecard{flex:0 0 auto;background:var(--card);border-top:2px solid var(--ink);padding:12px 14px calc(env(safe-area-inset-bottom) + 12px);max-height:46dvh;overflow:auto}
+.racehead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.racesteps{font-family:var(--serif);font-size:42px;line-height:.9;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.racesteps-lbl{margin-top:4px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);font-weight:650}
+.raceclock{font-variant-numeric:tabular-nums;font-weight:700;font-size:14px;color:var(--denim-d);text-align:right;padding-top:2px}
+.racecard h2{margin:8px 0 0;font-size:26px;line-height:1.05}
+.racemi{margin:2px 0 0;font-size:14px;color:var(--ink2)}
+.raceline{margin:6px 0 0;font-size:14.5px;line-height:1.35}
+.raceline.ok{color:var(--matcha-d)}
+.raceline.bad{color:#7A3410}
+.raceline.note{color:var(--ink2)}
+#race-vs-last.bad{background:var(--orange-l);color:#7A3410;border-radius:10px;padding:8px 10px}
+.racelegend{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:5px}
+.racelegend li{display:flex;align-items:center;gap:8px;font-size:13.5px}
+.racelegend span{color:var(--ink2)}
+.racelegend b{margin-left:auto;font-family:var(--serif);font-size:18px;font-variant-numeric:tabular-nums;font-weight:700}
+.sw{width:12px;height:12px;border-radius:50%;display:block;flex:0 0 12px}
+.sw.you{background:var(--orange)}
+.sw.swpace{background:var(--denim)}
+.sw.last{background:#D0D1C8;box-shadow:inset 0 0 0 1.5px #8A8C80}
+.ratebox{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--rule)}
+.ratehint{margin:3px 0 0;max-width:220px;font-size:12px;line-height:1.35;color:var(--ink3)}
+.stepper{display:flex;align-items:center;border:1px solid var(--rule);border-radius:999px;background:var(--paper);flex:0 0 auto}
+.stepper button{width:44px;height:44px;border:0;background:transparent;color:var(--denim-d);font-size:22px;line-height:1;cursor:pointer;touch-action:manipulation}
+.stepper button:disabled{color:var(--ink3);cursor:default}
+.stepper output{min-width:96px;text-align:center;font-weight:700;font-size:13.5px;font-variant-numeric:tabular-nums}
+.runner .leg,.runner .arm{transform-box:fill-box;transform-origin:center top}
+.runner .bob{transform-box:fill-box;transform-origin:center bottom}
+.runner .leg.a{transform:rotate(16deg)}
+.runner .leg.b{transform:rotate(-16deg)}
+.runner .arm.a{transform:rotate(-14deg)}
+.runner .arm.b{transform:rotate(16deg)}
+.runner.run .leg.a{animation:stride .45s ease-in-out infinite}
+.runner.run .leg.b{animation:stride .45s ease-in-out infinite reverse}
+.runner.run .arm.a{animation:armswing .45s ease-in-out infinite}
+.runner.run .arm.b{animation:armswing .45s ease-in-out infinite reverse}
+.runner.run .bob{animation:bob .45s ease-in-out infinite}
+.runner.run .pony{transform-box:fill-box;transform-origin:0% 30%;animation:pony .45s ease-in-out infinite}
+.runner.ghost{opacity:.8}
+.runner.ghost .token{stroke-dasharray:1.7 1.7}
+@keyframes stride{0%,100%{transform:rotate(24deg)}50%{transform:rotate(-24deg)}}
+@keyframes armswing{0%,100%{transform:rotate(18deg)}50%{transform:rotate(-18deg)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.5px)}}
+@keyframes pony{0%,100%{transform:rotate(8deg)}50%{transform:rotate(-16deg)}}
+@media (prefers-reduced-motion:reduce){
+  .runner.run .leg,.runner.run .arm,.runner.run .bob,.runner.run .pony{animation:none}
+}
+
+.racestage{position:relative}
+#race-gl{position:absolute;inset:0;width:100%;height:100%;display:none;touch-action:none}
+#race-flat{min-height:100%}
+body.stage-3d #race-gl{display:block}
+body.stage-3d #race-flat{display:none}
+body.stage-3d .racestage{overflow:hidden;touch-action:none;background:#D5DFEC}
+#race-recenter{position:absolute;z-index:3;top:10px;right:10px;min-height:44px;padding:8px 14px;border:1px solid var(--ink);border-radius:999px;background:var(--card);color:var(--ink);font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer;touch-action:manipulation}
+#race-recenter:focus-visible{outline:2px solid var(--denim);outline-offset:2px}
+#race-load{position:absolute;inset:0;z-index:4;display:none;align-items:flex-end;justify-content:center;padding:0 16px 18px;background:linear-gradient(#E4C4A4,#C4A07A);pointer-events:none}
+#race-load.on{display:flex}
+.race-load-card{width:min(260px,78%);background:rgba(251,248,240,.94);border:1px solid var(--ink);border-radius:12px;padding:10px 12px 12px}
+.race-load-bar{height:6px;border-radius:99px;background:var(--rule);overflow:hidden;margin-top:8px}
+#race-load-fill{height:100%;width:0;background:var(--orange);transition:width .15s linear}
+#race-fade{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0}
+#race-fade.on{animation:zonefade .62s ease forwards}
+@keyframes zonefade{0%{opacity:.8}100%{opacity:0}}
 </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 </head>
 <body>
 <div class="tabbar">
   <div class="tabbar-in">
     <span class="kicker">The Trail Ladder</span>
     <div class="tabs" role="tablist">
-      <button type="button" class="tab on" id="tabmap" role="tab" aria-selected="true">3D Map</button>
-      <button type="button" class="tab" id="tablad" role="tab" aria-selected="false">Ladder</button>
+      <button type="button" class="tab on" id="tabrace" role="tab" aria-selected="true" aria-controls="viewrace">Race</button>
+      <button type="button" class="tab" id="tablad" role="tab" aria-selected="false" aria-controls="viewladder">Ladder</button>
     </div>
   </div>
 </div>
-<div id="view3d">
-  <div id="map" role="application" aria-label="3D trail map"></div>
-  <div class="maphud">
-    <div class="mapcard">
-      <div class="kicker" id="mapkicker">Trail 1 of 4</div>
-      <h2 id="mapname">Riverside Walk</h2>
-      <div class="mapmeta">
-        <div><b id="mapmiles">0.0</b><span id="mapmileslbl">of 2.2 mi</span></div>
-        <div><b id="mapsteps">0</b><span>steps today</span></div>
+<div id="viewrace" role="tabpanel" aria-labelledby="tabrace">
+  <div class="racestage" id="racestage">
+    <button type="button" id="race-recenter" hidden>Recenter</button>
+    <div id="race-load"><div class="race-load-card"><div class="kicker">Setting the course</div><div class="race-load-bar"><div id="race-load-fill"></div></div></div></div>
+    <div id="race-fade"></div>
+    <canvas id="race-gl" hidden></canvas>
+    <div id="race-flat"><svg id="race-svg" viewBox="0 0 360 960" aria-hidden="true"></svg></div>
+  </div>
+  <div class="racecard">
+    <div class="racehead">
+      <div>
+        <div class="kicker" id="race-kicker">On the course</div>
+        <div class="racesteps" id="race-steps">0</div>
+        <div class="racesteps-lbl">steps today</div>
       </div>
-      <p class="mapnext" id="mapnext">Next checkpoint</p>
-      <p class="fine">Imagery © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community. Terrain: AWS Terrain Tiles. Routes © OpenStreetMap.</p>
+      <div class="raceclock" id="race-clock">—</div>
     </div>
-    <div class="mapchips" id="mapchips"></div>
-    <button type="button" id="flybtn">Fly the trail</button>
+    <h2 id="race-where">Riverside Walk</h2>
+    <p class="racemi" id="race-mi">0.0 of 2.2 mi</p>
+    <div aria-live="polite">
+      <p class="raceline note" id="race-vs-pace">The day starts at 4:00 AM ET.</p>
+      <p class="raceline note" id="race-vs-last">Everyone is on the start line.</p>
+    </div>
+    <ul class="racelegend">
+      <li><i class="sw you"></i><span>You</span><b id="race-you-n">0</b></li>
+      <li><i class="sw swpace"></i><span>Pace</span><b id="race-pace-n">0</b></li>
+      <li><i class="sw last"></i><span>Last chance</span><b id="race-last-n">0</b></li>
+    </ul>
+    <div class="ratebox">
+      <div>
+        <div class="kicker">Max rate</div>
+        <p class="ratehint">Last chance is 100K minus this hourly pace times the hours left until 10 PM.</p>
+      </div>
+      <div class="stepper" role="group" aria-label="Max steps per hour">
+        <button type="button" id="rate-dec" aria-label="Lower max rate">−</button>
+        <output id="rate-val">8,000 / hr</output>
+        <button type="button" id="rate-inc" aria-label="Raise max rate">+</button>
+      </div>
+    </div>
   </div>
 </div>
 <div class="wrap" id="viewladder">
-  <p class="note" id="webglnote" hidden>The 3D map couldn't start in this browser, so the ladder is showing.</p>
   <div class="mast"><span class="kicker">The Trail Ladder</span><span class="kicker" id="today">Wed · Oct 28</span></div>
   <h1>100,000 steps, <em>four trails</em>, one very long day.</h1>
   <p class="dek">Zion's river, Angels Landing, Half Dome and the Inca Trail to the Sun Gate, walked one step at a time.</p>
@@ -190,7 +260,6 @@ body.mode-map .maplibregl-ctrl-top-left,body.mode-map .maplibregl-ctrl-top-right
   </details>
   <div class="foot" id="foot"></div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script>
 const TOPIC="__TOPIC__";
 const SPM=2100, GOAL=100000, TOTAL_MI=47.8, MAX_STEPS=150000;
@@ -344,262 +413,410 @@ function render(){
   $("notes").innerHTML=notes.join("");
   $("foot").innerHTML=`<b>Last step update:</b> ${maxAt?etTime(maxAt)+" ET":"none yet today"}${lastMsg&&maxAt&&lastMsg>maxAt?" · last message "+etTime(lastMsg)+" ET":""}<br><b>Checked:</b> ${lastFetchOk?etTime(lastFetchOk)+" ET":"connecting…"} · refreshes every minute<br>Miles use about ${fmt(SPM)} steps per mile, an estimate. The full ladder is ${TOTAL_MI} mi, so 100K lands just before the Sun Gate.`;
 
-  try{syncMap(steps,mi)}catch(e){}
+  try{syncRace(steps)}catch(e){}
 }
-const ROUTES=[[[-112.9478,37.28533],[-112.9482,37.28564],[-112.94845,37.2858],[-112.94868,37.28601],[-112.94873,37.28608],[-112.94878,37.28618],[-112.94878,37.28622],[-112.94872,37.2866],[-112.94871,37.28665],[-112.94867,37.28668],[-112.9485,37.28681],[-112.94838,37.28692],[-112.94811,37.28721],[-112.94766,37.28754],[-112.94733,37.28766],[-112.94725,37.2877],[-112.94709,37.28789],[-112.94702,37.28814],[-112.94691,37.28831],[-112.94684,37.28844],[-112.94681,37.28864],[-112.94682,37.28886],[-112.94684,37.28895],[-112.94696,37.28913],[-112.94699,37.28931],[-112.9472,37.28968],[-112.9473,37.28989],[-112.94738,37.29012],[-112.94739,37.29024],[-112.94736,37.2905],[-112.94737,37.29064],[-112.94731,37.29078],[-112.94732,37.29081],[-112.94736,37.29088],[-112.94735,37.29104],[-112.94739,37.29111],[-112.94732,37.29115],[-112.94728,37.29119],[-112.94725,37.29124],[-112.94722,37.29126],[-112.94716,37.29127],[-112.94699,37.29128],[-112.9469,37.29136],[-112.94686,37.29153],[-112.94686,37.29167],[-112.94688,37.29181],[-112.94679,37.29189],[-112.94663,37.29209],[-112.94662,37.29221],[-112.9466,37.29224],[-112.94649,37.29231],[-112.94647,37.29236],[-112.94645,37.29245],[-112.94648,37.29266],[-112.94651,37.29273],[-112.9466,37.29291],[-112.94664,37.29301],[-112.94679,37.29323],[-112.94683,37.29327],[-112.94709,37.29345],[-112.9472,37.29357],[-112.94731,37.29365],[-112.94745,37.29372],[-112.94831,37.29402],[-112.9484,37.29407],[-112.9484,37.29409],[-112.94833,37.2944],[-112.94826,37.29477],[-112.94823,37.29505],[-112.94808,37.29518],[-112.94807,37.29528],[-112.948,37.29555],[-112.94796,37.2956],[-112.94791,37.29564],[-112.94785,37.29573],[-112.94787,37.29591],[-112.94793,37.29602],[-112.94793,37.29619],[-112.94809,37.29649],[-112.94819,37.29658],[-112.94809,37.29649],[-112.94793,37.29619],[-112.94793,37.29602],[-112.94787,37.29591],[-112.94785,37.29573],[-112.94791,37.29564],[-112.94796,37.2956],[-112.948,37.29555],[-112.94807,37.29528],[-112.94808,37.29518],[-112.94823,37.29505],[-112.94826,37.29477],[-112.94833,37.2944],[-112.9484,37.29409],[-112.9484,37.29407],[-112.94831,37.29402],[-112.94745,37.29372],[-112.94731,37.29365],[-112.9472,37.29357],[-112.94709,37.29345],[-112.94683,37.29327],[-112.94679,37.29323],[-112.94664,37.29301],[-112.9466,37.29291],[-112.94651,37.29273],[-112.94648,37.29266],[-112.94645,37.29245],[-112.94647,37.29236],[-112.94649,37.29231],[-112.9466,37.29224],[-112.94662,37.29221],[-112.94663,37.29209],[-112.94679,37.29189],[-112.94688,37.29181],[-112.94686,37.29167],[-112.94686,37.29153],[-112.9469,37.29136],[-112.94699,37.29128],[-112.94716,37.29127],[-112.94722,37.29126],[-112.94725,37.29124],[-112.94728,37.29119],[-112.94732,37.29115],[-112.94739,37.29111],[-112.94735,37.29104],[-112.94736,37.29088],[-112.94732,37.29081],[-112.94731,37.29078],[-112.94737,37.29064],[-112.94736,37.2905],[-112.94739,37.29024],[-112.94738,37.29012],[-112.9473,37.28989],[-112.9472,37.28968],[-112.94699,37.28931],[-112.94696,37.28913],[-112.94684,37.28895],[-112.94682,37.28886],[-112.94681,37.28864],[-112.94684,37.28844],[-112.94691,37.28831],[-112.94702,37.28814],[-112.94709,37.28789],[-112.94725,37.2877],[-112.94733,37.28766],[-112.94766,37.28754],[-112.94811,37.28721],[-112.94838,37.28692],[-112.9485,37.28681],[-112.94867,37.28668],[-112.94871,37.28665],[-112.94872,37.2866],[-112.94878,37.28622],[-112.94878,37.28618],[-112.94873,37.28608],[-112.94868,37.28601],[-112.94845,37.2858],[-112.9482,37.28564],[-112.9478,37.28533]],[[-112.95153,37.25997],[-112.95097,37.26035],[-112.95068,37.26086],[-112.95067,37.26098],[-112.95072,37.2611],[-112.95066,37.26132],[-112.95074,37.26149],[-112.95069,37.26174],[-112.95076,37.26196],[-112.9507,37.26226],[-112.95065,37.26235],[-112.9507,37.26317],[-112.95061,37.26331],[-112.95058,37.2638],[-112.95047,37.26416],[-112.95054,37.26426],[-112.95042,37.2644],[-112.95038,37.26454],[-112.95039,37.26475],[-112.95042,37.26476],[-112.9506,37.26462],[-112.95066,37.26454],[-112.9507,37.26455],[-112.95082,37.26476],[-112.95085,37.26503],[-112.95098,37.26522],[-112.95096,37.26529],[-112.95059,37.26559],[-112.95071,37.26582],[-112.95071,37.26598],[-112.95063,37.26611],[-112.95064,37.26621],[-112.95083,37.26628],[-112.95081,37.26618],[-112.95086,37.26609],[-112.9509,37.26608],[-112.95106,37.26621],[-112.95142,37.26622],[-112.95185,37.26652],[-112.95181,37.26664],[-112.95149,37.26686],[-112.95135,37.26717],[-112.95146,37.26733],[-112.95147,37.26744],[-112.95132,37.26783],[-112.95147,37.26795],[-112.95146,37.26828],[-112.95158,37.26843],[-112.95161,37.26856],[-112.95148,37.26869],[-112.9514,37.26869],[-112.95129,37.26879],[-112.95128,37.26886],[-112.95136,37.26881],[-112.9514,37.26882],[-112.95126,37.26897],[-112.95108,37.26902],[-112.95099,37.26899],[-112.95096,37.26901],[-112.95106,37.26911],[-112.95115,37.26912],[-112.95156,37.26887],[-112.95157,37.26892],[-112.9513,37.26914],[-112.95131,37.26919],[-112.95161,37.269],[-112.95165,37.26903],[-112.95143,37.26926],[-112.95126,37.26934],[-112.9509,37.26941],[-112.95076,37.26936],[-112.95089,37.26954],[-112.95108,37.26946],[-112.95088,37.26963],[-112.95083,37.26962],[-112.95062,37.26941],[-112.95056,37.26941],[-112.95031,37.26956],[-112.95036,37.26992],[-112.95034,37.26996],[-112.95025,37.27],[-112.95068,37.27156],[-112.95117,37.2731],[-112.95144,37.27443],[-112.95155,37.27525],[-112.95134,37.27526],[-112.95127,37.27513],[-112.95085,37.27497],[-112.9508,37.27492],[-112.95073,37.2746],[-112.95059,37.2744],[-112.95056,37.27421],[-112.95049,37.27414],[-112.95046,37.27393],[-112.95049,37.27373],[-112.95048,37.27352],[-112.95023,37.27287],[-112.95026,37.27243],[-112.95015,37.27181],[-112.94994,37.27138],[-112.94978,37.27113],[-112.94981,37.27103],[-112.94976,37.27098],[-112.94966,37.27062],[-112.94948,37.27052],[-112.94925,37.27027],[-112.94906,37.27017],[-112.949,37.27008],[-112.94837,37.26971],[-112.94792,37.26931],[-112.94837,37.26971],[-112.949,37.27008],[-112.94906,37.27017],[-112.94925,37.27027],[-112.94948,37.27052],[-112.94966,37.27062],[-112.94976,37.27098],[-112.94981,37.27103],[-112.94978,37.27113],[-112.94994,37.27138],[-112.95015,37.27181],[-112.95026,37.27243],[-112.95023,37.27287],[-112.95048,37.27352],[-112.95049,37.27373],[-112.95046,37.27393],[-112.95049,37.27414],[-112.95056,37.27421],[-112.95059,37.2744],[-112.95073,37.2746],[-112.9508,37.27492],[-112.95085,37.27497],[-112.95127,37.27513],[-112.95134,37.27526],[-112.95155,37.27525],[-112.95144,37.27443],[-112.95117,37.2731],[-112.95068,37.27156],[-112.95025,37.27],[-112.95034,37.26996],[-112.95036,37.26992],[-112.95031,37.26956],[-112.95056,37.26941],[-112.95062,37.26941],[-112.95083,37.26962],[-112.95088,37.26963],[-112.95108,37.26946],[-112.95089,37.26954],[-112.95076,37.26936],[-112.9509,37.26941],[-112.95126,37.26934],[-112.95143,37.26926],[-112.95165,37.26903],[-112.95161,37.269],[-112.95131,37.26919],[-112.9513,37.26914],[-112.95157,37.26892],[-112.95156,37.26887],[-112.95115,37.26912],[-112.95106,37.26911],[-112.95096,37.26901],[-112.95099,37.26899],[-112.95108,37.26902],[-112.95126,37.26897],[-112.9514,37.26882],[-112.95136,37.26881],[-112.95128,37.26886],[-112.95129,37.26879],[-112.9514,37.26869],[-112.95148,37.26869],[-112.95161,37.26856],[-112.95158,37.26843],[-112.95146,37.26828],[-112.95147,37.26795],[-112.95132,37.26783],[-112.95147,37.26744],[-112.95146,37.26733],[-112.95135,37.26717],[-112.95149,37.26686],[-112.95181,37.26664],[-112.95185,37.26652],[-112.95142,37.26622],[-112.95106,37.26621],[-112.9509,37.26608],[-112.95086,37.26609],[-112.95081,37.26618],[-112.95083,37.26628],[-112.95064,37.26621],[-112.95063,37.26611],[-112.95071,37.26598],[-112.95071,37.26582],[-112.95059,37.26559],[-112.95096,37.26529],[-112.95098,37.26522],[-112.95085,37.26503],[-112.95082,37.26476],[-112.9507,37.26455],[-112.95066,37.26454],[-112.9506,37.26462],[-112.95042,37.26476],[-112.95039,37.26475],[-112.95038,37.26454],[-112.95042,37.2644],[-112.95054,37.26426],[-112.95047,37.26416],[-112.95058,37.2638],[-112.95061,37.26331],[-112.9507,37.26317],[-112.95065,37.26235],[-112.9507,37.26226],[-112.95076,37.26196],[-112.95069,37.26174],[-112.95074,37.26149],[-112.95066,37.26132],[-112.95072,37.2611],[-112.95067,37.26098],[-112.95068,37.26086],[-112.95097,37.26035],[-112.95153,37.25997]],[[-119.55778,37.73282],[-119.55838,37.73117],[-119.55797,37.73052],[-119.55782,37.72976],[-119.55858,37.72686],[-119.55816,37.72659],[-119.55749,37.72655],[-119.5568,37.72621],[-119.55639,37.7263],[-119.55555,37.72604],[-119.55466,37.72647],[-119.55435,37.72649],[-119.55341,37.72622],[-119.55193,37.72635],[-119.55132,37.72566],[-119.55126,37.7259],[-119.55101,37.726],[-119.54995,37.72596],[-119.5493,37.72623],[-119.54681,37.72622],[-119.5462,37.7264],[-119.54559,37.72686],[-119.54558,37.72675],[-119.54509,37.72686],[-119.54424,37.72661],[-119.54278,37.72663],[-119.54329,37.72733],[-119.54212,37.72714],[-119.54161,37.7268],[-119.54164,37.72652],[-119.54183,37.72644],[-119.54094,37.72616],[-119.54038,37.72632],[-119.54011,37.72657],[-119.53934,37.72666],[-119.53812,37.72777],[-119.53792,37.72765],[-119.53784,37.72713],[-119.53732,37.72644],[-119.53625,37.72667],[-119.5361,37.7265],[-119.53577,37.72653],[-119.53564,37.72619],[-119.53539,37.72606],[-119.53527,37.72625],[-119.53503,37.72628],[-119.53505,37.72654],[-119.53485,37.72681],[-119.53397,37.72643],[-119.5338,37.72612],[-119.53371,37.72632],[-119.53361,37.72618],[-119.53359,37.72632],[-119.53346,37.72622],[-119.53348,37.72633],[-119.53294,37.72641],[-119.53287,37.72655],[-119.53277,37.72639],[-119.53262,37.7265],[-119.5325,37.72636],[-119.53242,37.72644],[-119.53232,37.72631],[-119.53183,37.72625],[-119.53075,37.7262],[-119.5307,37.72636],[-119.53038,37.72614],[-119.53046,37.72654],[-119.53,37.72631],[-119.52918,37.72744],[-119.529,37.72718],[-119.52863,37.72819],[-119.52812,37.72848],[-119.52762,37.72909],[-119.52658,37.72983],[-119.5257,37.7302],[-119.52453,37.73013],[-119.52297,37.7307],[-119.52077,37.73185],[-119.51966,37.7327],[-119.51925,37.73333],[-119.51514,37.73447],[-119.51452,37.73513],[-119.51402,37.73538],[-119.51463,37.73538],[-119.51441,37.73579],[-119.51486,37.73576],[-119.51469,37.73616],[-119.51499,37.73623],[-119.51491,37.73748],[-119.51438,37.7381],[-119.51512,37.73898],[-119.51517,37.7397],[-119.51551,37.73993],[-119.51446,37.74083],[-119.51323,37.74074],[-119.51287,37.74056],[-119.51221,37.74075],[-119.51249,37.74106],[-119.51214,37.74107],[-119.51199,37.74123],[-119.51117,37.74149],[-119.51279,37.74244],[-119.51263,37.74261],[-119.51176,37.74258],[-119.51223,37.74316],[-119.51294,37.74348],[-119.51274,37.74366],[-119.51198,37.74375],[-119.51238,37.74401],[-119.51222,37.74412],[-119.51281,37.74462],[-119.51273,37.74507],[-119.51317,37.74568],[-119.51308,37.74584],[-119.51337,37.7461],[-119.51317,37.7463],[-119.51365,37.74664],[-119.51376,37.74706],[-119.51364,37.7472],[-119.51401,37.74803],[-119.51499,37.74811],[-119.51445,37.74882],[-119.51611,37.74945],[-119.51577,37.75066],[-119.51644,37.7515],[-119.51746,37.75163],[-119.51845,37.75216],[-119.51904,37.75225],[-119.52147,37.75202],[-119.52167,37.75195],[-119.52187,37.75157],[-119.52157,37.75142],[-119.52177,37.75111],[-119.52124,37.75111],[-119.52147,37.75066],[-119.52265,37.75011],[-119.523,37.75014],[-119.52317,37.74998],[-119.52387,37.75001],[-119.52431,37.74953],[-119.52517,37.74967],[-119.52613,37.74954],[-119.52675,37.74896],[-119.52722,37.74878],[-119.52711,37.74844],[-119.52724,37.7485],[-119.52721,37.74827],[-119.52736,37.74834],[-119.52733,37.74807],[-119.52747,37.74825],[-119.5275,37.74811],[-119.52773,37.74818],[-119.52773,37.748],[-119.52821,37.748],[-119.52938,37.74725],[-119.52974,37.74679],[-119.53299,37.74548],[-119.53316,37.74555],[-119.53311,37.74573],[-119.53328,37.74594],[-119.53311,37.74573],[-119.53316,37.74555],[-119.53299,37.74548],[-119.52974,37.74679],[-119.52938,37.74725],[-119.52821,37.748],[-119.52773,37.748],[-119.52773,37.74818],[-119.5275,37.74811],[-119.52747,37.74825],[-119.52733,37.74807],[-119.52736,37.74834],[-119.52721,37.74827],[-119.52724,37.7485],[-119.52711,37.74844],[-119.52722,37.74878],[-119.52675,37.74896],[-119.52613,37.74954],[-119.52517,37.74967],[-119.52431,37.74953],[-119.52387,37.75001],[-119.52317,37.74998],[-119.523,37.75014],[-119.52265,37.75011],[-119.52147,37.75066],[-119.52124,37.75111],[-119.52177,37.75111],[-119.52157,37.75142],[-119.52187,37.75157],[-119.52167,37.75195],[-119.52147,37.75202],[-119.51904,37.75225],[-119.51845,37.75216],[-119.51746,37.75163],[-119.51644,37.7515],[-119.51577,37.75066],[-119.51611,37.74945],[-119.51445,37.74882],[-119.51499,37.74811],[-119.51401,37.74803],[-119.51364,37.7472],[-119.51376,37.74706],[-119.51365,37.74664],[-119.51317,37.7463],[-119.51337,37.7461],[-119.51308,37.74584],[-119.51317,37.74568],[-119.51273,37.74507],[-119.51281,37.74462],[-119.51222,37.74412],[-119.51238,37.74401],[-119.51198,37.74375],[-119.51274,37.74366],[-119.51294,37.74348],[-119.51223,37.74316],[-119.51176,37.74258],[-119.51263,37.74261],[-119.51279,37.74244],[-119.51117,37.74149],[-119.51199,37.74123],[-119.51214,37.74107],[-119.51249,37.74106],[-119.51221,37.74075],[-119.51287,37.74056],[-119.51323,37.74074],[-119.51446,37.74083],[-119.51551,37.73993],[-119.51517,37.7397],[-119.51512,37.73898],[-119.51438,37.7381],[-119.51491,37.73748],[-119.51499,37.73623],[-119.51469,37.73616],[-119.51486,37.73576],[-119.51441,37.73579],[-119.51463,37.73538],[-119.51402,37.73538],[-119.51452,37.73513],[-119.51514,37.73447],[-119.51925,37.73333],[-119.51966,37.7327],[-119.52077,37.73185],[-119.52297,37.7307],[-119.52453,37.73013],[-119.5257,37.7302],[-119.52658,37.72983],[-119.52762,37.72909],[-119.52812,37.72848],[-119.52863,37.72819],[-119.529,37.72718],[-119.52918,37.72744],[-119.53,37.72631],[-119.53046,37.72654],[-119.53038,37.72614],[-119.5307,37.72636],[-119.53075,37.7262],[-119.53183,37.72625],[-119.53232,37.72631],[-119.53242,37.72644],[-119.5325,37.72636],[-119.53262,37.7265],[-119.53277,37.72639],[-119.53287,37.72655],[-119.53294,37.72641],[-119.53348,37.72633],[-119.53346,37.72622],[-119.53359,37.72632],[-119.53361,37.72618],[-119.53371,37.72632],[-119.5338,37.72612],[-119.53397,37.72643],[-119.53485,37.72681],[-119.53505,37.72654],[-119.53503,37.72628],[-119.53527,37.72625],[-119.53539,37.72606],[-119.53564,37.72619],[-119.53577,37.72653],[-119.5361,37.7265],[-119.53625,37.72667],[-119.53732,37.72644],[-119.53784,37.72713],[-119.53792,37.72765],[-119.53812,37.72777],[-119.53934,37.72666],[-119.54011,37.72657],[-119.54038,37.72632],[-119.54094,37.72616],[-119.54183,37.72644],[-119.54164,37.72652],[-119.54161,37.7268],[-119.54212,37.72714],[-119.54329,37.72733],[-119.54278,37.72663],[-119.54424,37.72661],[-119.54509,37.72686],[-119.54558,37.72675],[-119.54559,37.72686],[-119.5462,37.7264],[-119.54681,37.72622],[-119.5493,37.72623],[-119.54995,37.72596],[-119.55101,37.726],[-119.55126,37.7259],[-119.55132,37.72566],[-119.55193,37.72635],[-119.55341,37.72622],[-119.55435,37.72649],[-119.55466,37.72647],[-119.55555,37.72604],[-119.55639,37.7263],[-119.5568,37.72621],[-119.55749,37.72655],[-119.55816,37.72659],[-119.55858,37.72686],[-119.55782,37.72976],[-119.55797,37.73052],[-119.55838,37.73117],[-119.55778,37.73282]],[[-72.38199,-13.2147],[-72.3842,-13.21564],[-72.38401,-13.21612],[-72.38475,-13.21656],[-72.38499,-13.21718],[-72.38736,-13.21885],[-72.389,-13.22044],[-72.38953,-13.22152],[-72.39065,-13.22257],[-72.39205,-13.22321],[-72.394,-13.2235],[-72.39587,-13.22449],[-72.39676,-13.22548],[-72.39846,-13.22646],[-72.39898,-13.22709],[-72.40096,-13.22767],[-72.40273,-13.22867],[-72.40344,-13.22953],[-72.40352,-13.23035],[-72.40443,-13.23128],[-72.40653,-13.23119],[-72.40877,-13.23257],[-72.41095,-13.23324],[-72.41444,-13.23252],[-72.41667,-13.23316],[-72.41735,-13.23451],[-72.41894,-13.2356],[-72.41916,-13.23604],[-72.41915,-13.23718],[-72.42008,-13.2364],[-72.42007,-13.23576],[-72.42147,-13.23498],[-72.42267,-13.23529],[-72.42281,-13.23588],[-72.42362,-13.23624],[-72.42416,-13.23593],[-72.42478,-13.23626],[-72.42558,-13.23568],[-72.42603,-13.2378],[-72.4265,-13.23877],[-72.42735,-13.23961],[-72.42736,-13.24027],[-72.42863,-13.24337],[-72.42864,-13.244],[-72.43054,-13.24617],[-72.43321,-13.2481],[-72.43331,-13.24842],[-72.43424,-13.2488],[-72.4351,-13.24984],[-72.4416,-13.25438],[-72.44167,-13.25509],[-72.44227,-13.25625],[-72.44294,-13.25693],[-72.44324,-13.25781],[-72.44378,-13.25825],[-72.44447,-13.26019],[-72.44605,-13.2623],[-72.44646,-13.26376],[-72.44733,-13.26466],[-72.44846,-13.26474],[-72.4491,-13.26426],[-72.44929,-13.26443],[-72.44988,-13.26429],[-72.45151,-13.26299],[-72.45366,-13.26232],[-72.45561,-13.26116],[-72.45796,-13.26027],[-72.46086,-13.26051],[-72.46153,-13.2608],[-72.46229,-13.2605],[-72.46163,-13.25956],[-72.4618,-13.25932],[-72.46148,-13.25879],[-72.46155,-13.25802],[-72.46505,-13.25505],[-72.46705,-13.25436],[-72.46793,-13.25315],[-72.46821,-13.25339],[-72.46929,-13.25238],[-72.47119,-13.25166],[-72.47235,-13.25012],[-72.47485,-13.24831],[-72.47805,-13.24816],[-72.47858,-13.24776],[-72.47944,-13.24628],[-72.48383,-13.24331],[-72.48434,-13.2428],[-72.4842,-13.24231],[-72.48572,-13.24133],[-72.48671,-13.24106],[-72.48681,-13.24073],[-72.48719,-13.24058],[-72.48822,-13.24117],[-72.4895,-13.24097],[-72.49021,-13.23993],[-72.49115,-13.23966],[-72.49227,-13.23831],[-72.49381,-13.23721],[-72.49583,-13.23665],[-72.49646,-13.23672],[-72.49717,-13.23563],[-72.49798,-13.23531],[-72.49818,-13.23414],[-72.49915,-13.23336],[-72.49991,-13.23087],[-72.50067,-13.23042],[-72.50164,-13.22822],[-72.50231,-13.22794],[-72.5024,-13.22752],[-72.50274,-13.22776],[-72.50456,-13.22658],[-72.50629,-13.22698],[-72.50779,-13.22613],[-72.5083,-13.22612],[-72.5083,-13.2259],[-72.50976,-13.22634],[-72.51036,-13.2261],[-72.51152,-13.22612],[-72.51607,-13.22807],[-72.5155,-13.22736],[-72.51548,-13.22695],[-72.516,-13.2268],[-72.51628,-13.22627],[-72.51744,-13.2253],[-72.51967,-13.22206],[-72.51992,-13.22091],[-72.52117,-13.22044],[-72.52247,-13.21928],[-72.52256,-13.21893],[-72.52407,-13.21777],[-72.52482,-13.21786],[-72.52515,-13.21758],[-72.52483,-13.21697],[-72.5251,-13.2164],[-72.52263,-13.21536],[-72.52288,-13.21385],[-72.52412,-13.21175],[-72.52522,-13.21091],[-72.52596,-13.21066],[-72.52679,-13.2099],[-72.52727,-13.20898],[-72.52826,-13.20864],[-72.52893,-13.20779],[-72.5301,-13.20724],[-72.53029,-13.20677],[-72.53097,-13.2069],[-72.53168,-13.20636],[-72.53211,-13.20641],[-72.53252,-13.20563],[-72.53211,-13.20501],[-72.53247,-13.20494],[-72.53369,-13.20337],[-72.53645,-13.20225],[-72.53737,-13.20242],[-72.53917,-13.2015],[-72.53938,-13.20005],[-72.54067,-13.19809],[-72.54049,-13.19507],[-72.54076,-13.19383],[-72.54104,-13.19371],[-72.54139,-13.19278],[-72.54119,-13.19196],[-72.5408,-13.19157],[-72.54197,-13.19036],[-72.54154,-13.18872],[-72.54205,-13.18765],[-72.54213,-13.18669],[-72.54142,-13.18594],[-72.54145,-13.18531],[-72.54102,-13.18642],[-72.54065,-13.18669],[-72.54071,-13.18712],[-72.54002,-13.18746],[-72.53959,-13.18945],[-72.53725,-13.19007],[-72.53858,-13.18876],[-72.5388,-13.18794],[-72.53851,-13.18697],[-72.53917,-13.18653],[-72.53898,-13.18492],[-72.53995,-13.18273],[-72.54054,-13.18243],[-72.54073,-13.18131],[-72.54125,-13.18092],[-72.54106,-13.18056],[-72.5414,-13.17942],[-72.54011,-13.17846],[-72.53977,-13.17858],[-72.53888,-13.17801],[-72.53788,-13.17778],[-72.53602,-13.17649],[-72.53572,-13.17463],[-72.53535,-13.17412],[-72.53463,-13.17377],[-72.53456,-13.17331],[-72.53361,-13.17311],[-72.53327,-13.17259],[-72.53376,-13.17144],[-72.53393,-13.16964]]];
-
-const CHIP=["Riverside","Angels","Half Dome","Inca"];
-const Z=[15.1,14.7,13.9,13.1];
-const FLYZ=[14.2,13.5,12.5,11.4];
-const LOCK='<svg class="locksvg" viewBox="0 0 16 16" width="11" height="11" aria-hidden="true"><rect x="3.2" y="7" width="9.6" height="6.5" rx="1.4" fill="currentColor"/><path d="M5.2 7V5.1a2.8 2.8 0 0 1 5.6 0V7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
-let mapHold=null,map=null,mapReady=false,you=null,lockPin=null;
-let viewI=0,followLive=true,flying=false,flyToken=0,lastKey="",markAt=null,markToken=0;
-function hav(a,b){
-  const R=6371000,p1=a[1]*Math.PI/180,p2=b[1]*Math.PI/180;
-  const dp=(b[1]-a[1])*Math.PI/180,dl=(b[0]-a[0])*Math.PI/180;
-  const x=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
-  return 2*R*Math.asin(Math.min(1,Math.sqrt(x)));
+const RACE_PTS=[[4,0],...CPS.map(c=>[c[0],c[1]])];
+const RATE_KEY="trail100k_rate";
+let raceReady=false, raceRate=8000, keptSteps=0, racePrimed=false, raceFramed=false;
+let course=null;
+const shown={you:0,pace:0,last:0};
+const goalFrac={you:0,pace:0,last:0};
+const jobs={you:0,pace:0,last:0};
+let raceCur={phase:"pre",h:0,pace:0,last:0,you:0};
+function reduced(){return window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches}
+function etHourExact(d){
+  const p={};
+  new Intl.DateTimeFormat("en-US",{timeZone:TZ,hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(d).forEach(x=>{p[x.type]=x.value});
+  let hh=+p.hour; if(hh===24) hh=0;
+  return hh+(+p.minute)/60+(+p.second)/3600;
 }
-const CUMS=ROUTES.map(coords=>{const c=[0];for(let i=1;i<coords.length;i++)c.push(c[i-1]+hav(coords[i-1],coords[i]));return c});
-function heading(a,b){
-  const f=Math.PI/180,φ1=a[1]*f,φ2=b[1]*f,Δ=(b[0]-a[0])*f;
-  const y=Math.sin(Δ)*Math.cos(φ2);
-  const x=Math.cos(φ1)*Math.sin(φ2)-Math.sin(φ1)*Math.cos(φ2)*Math.cos(Δ);
-  return (Math.atan2(y,x)*180/Math.PI+360)%360;
+function raceClock(d){
+  const p={};
+  new Intl.DateTimeFormat("en-US",{timeZone:TZ,hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(d).forEach(x=>{p[x.type]=x.value});
+  let hh=+p.hour; if(hh===24) hh=0;
+  const ap=hh>=12?"PM":"AM";
+  return (hh%12||12)+":"+String(p.minute).padStart(2,"0")+" "+ap+" ET";
 }
-function alongIdx(i,frac){
-  const coords=ROUTES[i],cum=CUMS[i];
-  const target=Math.max(0,Math.min(1,frac))*cum[cum.length-1];
-  let k=1;while(k<cum.length&&cum[k]<target)k++;
-  if(k>=cum.length)return coords[coords.length-1].slice();
-  const span=cum[k]-cum[k-1]||1,t=(target-cum[k-1])/span,a=coords[k-1],b=coords[k];
-  return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
+function racePaceAt(h){
+  if(h<=4) return 0;
+  if(h>=21) return GOAL;
+  for(let i=1;i<RACE_PTS.length;i++){
+    const a=RACE_PTS[i-1], b=RACE_PTS[i];
+    if(h<=b[0]) return a[1]+(b[1]-a[1])*(h-a[0])/(b[0]-a[0]);
+  }
+  return GOAL;
 }
-function splitLine(i,frac){
-  const coords=ROUTES[i],cum=CUMS[i];
-  if(frac<=0.0005)return {done:null,rest:coords};
-  if(frac>=0.9995)return {done:coords,rest:null};
-  const target=frac*cum[cum.length-1];
-  let k=1;while(k<cum.length&&cum[k]<target)k++;
-  const span=cum[k]-cum[k-1]||1,t=(target-cum[k-1])/span,a=coords[k-1],b=coords[k];
-  const p=[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
-  return {done:coords.slice(0,k).concat([p]),rest:[p].concat(coords.slice(k))};
+function lastChanceAt(h, r){
+  if(h<4) return 0;
+  return Math.max(0, GOAL-r*Math.max(0, 22-h));
 }
-function currentIndex(mi){const i=TRAILS.findIndex(t=>mi<t.end-1e-9);return i<0?TRAILS.length-1:i}
-function trailState(i,mi){const t=TRAILS[i];if(mi>=t.end-1e-9)return "done";if(mi+1e-9>=t.start)return "now";return "lock"}
-function localFrac(i,mi){const t=TRAILS[i],st=trailState(i,mi);if(st==="done")return 1;if(st==="lock")return 0;return Math.max(0,Math.min(1,(mi-t.start)/(t.end-t.start)))}
-function syncMap(steps,mi){mapHold={steps:steps,mi:mi};if(mapReady)mapApply(true,false)}
-function showLadder(msg){
-  document.body.classList.remove("mode-map");
-  const b=$("tabmap");if(b){b.disabled=true;b.classList.remove("on");b.setAttribute("aria-selected","false")}
-  const l=$("tablad");if(l){l.classList.add("on");l.setAttribute("aria-selected","true")}
-  const n=$("webglnote");if(n){n.hidden=false;if(msg)n.textContent=msg}
+function loadRate(){
+  try{
+    const n=Number(localStorage.getItem(RATE_KEY));
+    if(Number.isFinite(n)){
+      const r=Math.round(n/500)*500;
+      if(r>=5000&&r<=10000) return r;
+    }
+  }catch(e){}
+  return 8000;
+}
+function renderRate(){
+  $("rate-val").textContent=fmt(raceRate)+" / hr";
+  $("rate-dec").disabled=raceRate<=5000;
+  $("rate-inc").disabled=raceRate>=10000;
+}
+function stepsToFrac(steps){
+  return Math.max(0, Math.min(1, Math.max(0, steps)/SPM/TOTAL_MI));
+}
+function youPlace(steps){
+  const mi=Math.min(TOTAL_MI, Math.max(0, steps)/SPM);
+  const ti=locate(mi);
+  if(ti>=4) return {name:"Sun Gate", miText:"47.8 of 47.8 mi"};
+  const t=TRAILS[ti];
+  const into=Math.max(0, mi-t.start);
+  return {name:t.name, miText:into.toFixed(1)+" of "+(t.end-t.start).toFixed(1)+" mi"};
+}
+function modelAt(h){
+  const phase=h<4?"pre":h>=22?"post":"live";
+  if(phase==="pre") return {phase,h,pace:0,last:0,you:0};
+  return {phase,h,pace:racePaceAt(h),last:lastChanceAt(h, raceRate),you:keptSteps};
+}
+function writeStatus(m){
+  $("race-steps").textContent=fmt(keptSteps);
+  $("race-clock").textContent=raceClock(new Date());
+  const place=youPlace(m.phase==="pre"?0:keptSteps);
+  $("race-where").textContent=place.name;
+  $("race-mi").textContent=place.miText;
+  const paceEl=$("race-vs-pace"), lastEl=$("race-vs-last");
+  paceEl.className="raceline"; lastEl.className="raceline";
+  if(m.phase==="pre"){
+    $("race-kicker").textContent="Before the start";
+    paceEl.textContent="The day starts at 4:00 AM ET.";
+    paceEl.classList.add("note");
+    lastEl.textContent="Everyone is on the start line.";
+    lastEl.classList.add("note");
+  }else{
+    $("race-kicker").textContent=m.phase==="post"?"Final result":"On the course";
+    const diff=Math.round(keptSteps-m.pace);
+    if(diff>=0){paceEl.textContent=fmt(diff)+" steps ahead of pace"; paceEl.classList.add("ok")}
+    else{paceEl.textContent=fmt(-diff)+" steps behind pace"; paceEl.classList.add("bad")}
+    const youR=Math.round(keptSteps), lastR=Math.round(m.last);
+    if(youR<lastR){
+      lastEl.textContent="Below the last-chance line: 100K isn't reachable at your max rate";
+      lastEl.classList.add("bad");
+    }else{
+      lastEl.textContent=fmt(youR-lastR)+" steps of cushion before last chance";
+      lastEl.classList.add("ok");
+    }
+  }
+  $("race-you-n").textContent=fmt(m.you);
+  $("race-pace-n").textContent=fmt(m.pace);
+  $("race-last-n").textContent=fmt(m.last);
+}
+function publish(){
+  const root=$("viewrace");
+  if(!root) return;
+  root._state={
+    you:shown.you, pace:shown.pace, last:shown.last,
+    youSteps:raceCur.you, paceSteps:raceCur.pace, lastSteps:raceCur.last,
+    kept:keptSteps, phase:raceCur.phase, rate:raceRate, h:raceCur.h,
+    busy:!!(jobs.you||jobs.pace||jobs.last),
+    where:$("race-where").textContent,
+    mi:$("race-mi").textContent,
+    vsPace:$("race-vs-pace").textContent,
+    vsLast:$("race-vs-last").textContent,
+    kicker:$("race-kicker").textContent,
+    clock:$("race-clock").textContent,
+    mode:document.body.classList.contains("stage-3d")?"3d":"2d",
+    anims:raceGL?raceGL.anims():null,
+    stride:raceGL?raceGL.stride():null,
+    world:raceGL?raceGL.world():null,
+    tris:raceGL?raceGL.tris():0
+  };
+}
+function atFrac(frac){
+  const f=Math.max(0, Math.min(1, frac));
+  const d=f*course.L;
+  let lo=1, hi=course.cum.length-1;
+  while(lo<hi){
+    const mid=(lo+hi)>>1;
+    if(course.cum[mid]<d) lo=mid+1; else hi=mid;
+  }
+  const i=lo;
+  const span=course.cum[i]-course.cum[i-1]||1;
+  const u=Math.max(0, Math.min(1, (d-course.cum[i-1])/span));
+  const x=course.pts[i-1][0]+(course.pts[i][0]-course.pts[i-1][0])*u;
+  const y=course.pts[i-1][1]+(course.pts[i][1]-course.pts[i-1][1])*u;
+  const dx=course.pts[i][0]-course.pts[i-1][0];
+  const dy=course.pts[i][1]-course.pts[i-1][1];
+  const len=Math.hypot(dx,dy)||1;
+  return {x,y,dx,dy,nx:-dy/len,ny:dx/len};
+}
+function placeRunner(key){
+  const p=atFrac(shown[key]);
+  const off=key==="you"?-16:key==="last"?16:0;
+  const g=$("run-"+key);
+  g.setAttribute("transform","translate("+(p.x+p.nx*off).toFixed(2)+" "+(p.y+p.ny*off).toFixed(2)+")");
+  if(Math.abs(p.dx)>8) g.setAttribute("data-face", p.dx>=0?"1":"-1");
+  const s=g.getAttribute("data-face")==="-1"?-1:1;
+  const sc=key==="you"?1.42:1.28;
+  g.querySelector(".face").setAttribute("transform","scale("+(s*sc)+" "+sc+")");
+  if(raceGL) raceGL.place(key);
+}
+function settle(key){
+  publish();
+  if((key==="you"||!raceFramed)&&!jobs.you&&!jobs.pace&&!jobs.last){
+    raceFramed=true;
+    frameRunners(false);
+  }
+}
+function moveTo(key, frac, ms){
+  const el=$("run-"+key);
+  if(!el) return;
+  if(jobs[key] && Math.abs(goalFrac[key]-frac)<1e-4) return;
+  goalFrac[key]=frac;
+  if(jobs[key]){cancelAnimationFrame(jobs[key]); jobs[key]=0}
+  const from=shown[key];
+  if(Math.abs(frac-from)<1e-5||ms<=0||reduced()){
+    shown[key]=frac; placeRunner(key); el.classList.remove("run"); settle(key); return;
+  }
+  el.classList.add("run");
+  const t0=performance.now(), ease=key==="you";
+  const step=now=>{
+    const u=Math.min(1,(now-t0)/ms);
+    const e=ease?(u<0.5?2*u*u:1-Math.pow(-2*u+2,2)/2):u;
+    shown[key]=from+(frac-from)*e;
+    placeRunner(key);
+    if(u<1) jobs[key]=requestAnimationFrame(step);
+    else{jobs[key]=0; el.classList.remove("run"); settle(key)}
+  };
+  jobs[key]=requestAnimationFrame(step);
+}
+function frameRunners(retry){
+  if(document.body.classList.contains("stage-3d")) return;
+  if(!course||!document.body.classList.contains("mode-race")) return;
+  const stage=$("racestage"), svg=$("race-svg");
+  const w=svg.clientWidth;
+  if(!w){ if(!retry) requestAnimationFrame(()=>frameRunners(true)); return; }
+  const scale=w/360, h=stage.clientHeight;
+  if(!h) return;
+  const ys=["you","pace","last"].map(k=>atFrac(shown[k]).y*scale);
+  const top=Math.min.apply(null,ys)-36*scale, bot=Math.max.apply(null,ys)+48*scale;
+  const target=(bot-top<h)?(top+bot)/2-h/2:atFrac(shown.you).y*scale-h*0.42;
+  const max=Math.max(0, stage.scrollHeight-h);
+  stage.scrollTop=Math.max(0, Math.min(max, target));
+}
+function paint(kind){
+  if(!raceReady) return;
+  const h=etHourExact(new Date());
+  raceCur=modelAt(h);
+  writeStatus(raceCur);
+  const boot=!racePrimed; racePrimed=true;
+  const glide=kind==="rate"?650:(boot?800:2400);
+  moveTo("pace", stepsToFrac(raceCur.pace), glide);
+  moveTo("last", stepsToFrac(raceCur.last), glide);
+  const yf=stepsToFrac(raceCur.you);
+  if(kind==="you") moveTo("you", yf, reduced()?0:900);
+  else if(!jobs.you&&Math.abs(shown.you-yf)>1e-4) moveTo("you", yf, reduced()?0:900);
+  else if(!jobs.you){shown.you=yf; placeRunner("you")}
+  publish();
+}
+function syncRace(steps){
+  const changed=steps!==keptSteps;
+  keptSteps=steps;
+  if(!raceReady) return;
+  if(changed) paint("you");
+  else { raceCur=modelAt(etHourExact(new Date())); writeStatus(raceCur); publish(); }
+}
+function bumpRate(dir){
+  const next=Math.max(5000, Math.min(10000, raceRate+dir*500));
+  if(next===raceRate) return;
+  raceRate=next;
+  try{localStorage.setItem(RATE_KEY, String(raceRate))}catch(e){}
+  renderRate();
+  if(raceReady) paint("rate");
 }
 function setTab(which){
-  const mapOn=which==="map"&&!($("tabmap")&&$("tabmap").disabled);
-  document.body.classList.toggle("mode-map",mapOn);
-  $("tabmap").classList.toggle("on",mapOn);
-  $("tablad").classList.toggle("on",!mapOn);
-  $("tabmap").setAttribute("aria-selected",mapOn?"true":"false");
-  $("tablad").setAttribute("aria-selected",mapOn?"false":"true");
-  if(mapOn&&map)requestAnimationFrame(()=>{try{map.resize()}catch(e){}});
+  const race=which!=="ladder";
+  document.body.classList.toggle("mode-race", race);
+  document.body.classList.toggle("mode-ladder", !race);
+  $("tabrace").classList.toggle("on", race);
+  $("tablad").classList.toggle("on", !race);
+  $("tabrace").setAttribute("aria-selected", race?"true":"false");
+  $("tablad").setAttribute("aria-selected", race?"false":"true");
+  $("viewrace").setAttribute("aria-hidden", race?"false":"true");
+  $("viewladder").setAttribute("aria-hidden", race?"true":"false");
+  if(race){requestAnimationFrame(()=>frameRunners(false)); if(raceGL) raceGL.resume();}
+  else if(raceGL) raceGL.pause();
 }
-function reduced(){return window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches}
-function placeMarker(p,animate){
-  if(!you)return;
-  you.getElement().style.display="";
-  const from=markAt||p,to=p;
-  const token=++markToken;
-  const dur=animate&&!reduced()?900:0;
-  if(!dur){you.setLngLat(to);markAt=to.slice();return}
-  const t0=performance.now();
-  function frame(now){
-    if(token!==markToken)return;
-    const u=Math.min(1,(now-t0)/dur),e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
-    you.setLngLat([from[0]+(to[0]-from[0])*e,from[1]+(to[1]-from[1])*e]);
-    if(u<1)requestAnimationFrame(frame);else markAt=to.slice();
+function runnerMarkup(kind){
+  const you=kind==="you", pace=kind==="pace", ghost=kind==="last";
+  const ink=ghost?"#8A8C80":"#1E2419";
+  const shirt=you?"#E8772E":pace?"#3B5B85":"#D5D6CE";
+  const skin=ghost?"#ECECE6":"#F6D7C3";
+  const hair=ghost?"#8A8C80":"#1E2419";
+  const token=you?"#E8772E":pace?"#3B5B85":"#8A8C80";
+  return `<g id="run-${kind}" class="runner ${ghost?"ghost":kind}" data-face="1">
+    <circle class="token" cx="0" cy="0" r="5.6" fill="#FBF8F0" stroke="${token}" stroke-width="2"/>
+    <ellipse cx="0" cy="3.2" rx="10" ry="3" fill="#1E2419" opacity="${ghost?0.06:0.12}"/>
+    <g class="face"><circle cx="0" cy="-20" r="16" fill="#FBF8F0" opacity="0.94"/><g class="bob">
+      <g class="leg a"><line x1="-3.3" y1="-15.5" x2="-3.3" y2="-1.2" stroke="${ink}" stroke-width="2.5" stroke-linecap="round"/></g>
+      <g class="leg b"><line x1="3.3" y1="-15.5" x2="3.3" y2="-1.2" stroke="${ink}" stroke-width="2.5" stroke-linecap="round"/></g>
+      <path d="M-7,-28.2 C-8.2,-18 -6.2,-15.2 -3.6,-15.2 L3.6,-15.2 C6.2,-15.2 8.2,-18 7,-28.2 C3.4,-25.4 0,-24.6 -7,-28.2 Z" fill="${shirt}" stroke="${ink}" stroke-width="1.1" stroke-linejoin="round"/>
+      <g class="arm a"><line x1="-6.2" y1="-26" x2="-6.2" y2="-16.5" stroke="${ink}" stroke-width="2.1" stroke-linecap="round"/></g>
+      <g class="arm b"><line x1="6.2" y1="-26" x2="6.2" y2="-16.5" stroke="${ink}" stroke-width="2.1" stroke-linecap="round"/></g>
+      ${pace?`<g class="flag"><line x1="10" y1="-20" x2="10" y2="-41" stroke="#243B5C" stroke-width="1.6" stroke-linecap="round"/><path d="M10,-41 L22,-36.6 L10,-32.4 Z" fill="#7C9A4E" stroke="#243B5C" stroke-width="0.7" stroke-linejoin="round"/></g>`:""}
+      <circle cx="0" cy="-33.2" r="6.3" fill="${skin}" stroke="${ink}" stroke-width="1.15"/>
+      <path d="M-5.3,-34.4 Q0,-40.6 5.3,-34.4 L4,-32.5 L-4,-32.5 Z" fill="${hair}"/>
+      ${you?`<path class="pony" d="M4.4,-34.2 C9.4,-33 12.6,-27.6 9.2,-22.8" fill="none" stroke="${hair}" stroke-width="2.2" stroke-linecap="round"/>`:""}
+      ${ghost?`<path d="M-6.4,-33 Q0,-42 6.4,-33 L5,-30.2 L-5,-30.2 Z" fill="#C8C9C0" stroke="${ink}" stroke-width="0.8"/>`:""}
+      <circle cx="-2.1" cy="-33.4" r="0.7" fill="${ink}"/>
+      <circle cx="2.1" cy="-33.4" r="0.7" fill="${ink}"/>
+    </g></g>
+  </g>`;
+}
+function buildCourse(){
+  const pts=[];
+  for(let i=0;i<=36;i++){
+    const t=i/36;
+    const y=868-t*748;
+    const x=180+Math.sin(t*Math.PI*2.5)*58+Math.sin(t*Math.PI*5+0.4)*8;
+    pts.push([Math.round(x*10)/10, Math.round(y*10)/10]);
   }
-  requestAnimationFrame(frame);
-}
-function lookBearing(i,frac){
-  const a=alongIdx(i,frac),b=alongIdx(i,Math.min(1,frac+0.02));
-  if(hav(a,b)<8){const c=alongIdx(i,Math.max(0,frac-0.02));return heading(c,a)}
-  return heading(a,b);
-}
-function padCam(){return {top:78,bottom:230,left:16,right:16}}
-function followCam(i,frac,animate){
-  const p=alongIdx(i,frac);
-  const opt={center:p,zoom:Z[i],pitch:60,bearing:lookBearing(i,frac),padding:padCam()};
-  if(animate&&!reduced())map.easeTo(Object.assign({duration:900},opt));
-  else map.jumpTo(opt);
-}
-function overview(i,animate){
-  const b=new maplibregl.LngLatBounds(ROUTES[i][0],ROUTES[i][0]);
-  ROUTES[i].forEach(p=>b.extend(p));
-  map.fitBounds(b,{padding:{top:96,bottom:230,left:24,right:24},pitch:60,duration:animate&&!reduced()?1200:0,maxZoom:14});
-}
-function drawLine(i,frac,st){
-  const use=st==="lock"?0:frac;
-  const parts=splitLine(i,use);
-  const features=[];
-  if(parts.done&&parts.done.length>1)features.push({type:"Feature",properties:{part:"done"},geometry:{type:"LineString",coordinates:parts.done}});
-  if(parts.rest&&parts.rest.length>1)features.push({type:"Feature",properties:{part:"rest"},geometry:{type:"LineString",coordinates:parts.rest}});
-  map.getSource("route").setData({type:"FeatureCollection",features});
-  try{map.setPaintProperty("route-rest","line-dasharray",st==="lock"?[1.6,1.3]:null)}catch(e){}
-}
-function hud(i,mi,steps,st){
-  const t=TRAILS[i],len=t.end-t.start;
-  const done=st==="done"?len:st==="lock"?0:Math.max(0,Math.min(len,mi-t.start));
-  $("mapkicker").textContent=st==="lock"?`Trail ${i+1} of 4 · locked`:st==="done"?`Trail ${i+1} of 4 · finished`:`On trail ${i+1} of 4`;
-  $("mapname").textContent=t.name;
-  $("mapmiles").textContent=done.toFixed(1);
-  $("mapmileslbl").textContent=`of ${len.toFixed(1)} mi`;
-  $("mapsteps").textContent=fmt(steps);
-  let next="Next checkpoint: Sun Gate";
-  if(st==="lock")next="Locked. This trail is still ahead on the ladder.";
-  else if(st==="done")next="Finished. The whole line is walked.";
-  else{
-    const nxt=allLms().find(l=>l.mi>mi+1e-9);
-    next=nxt?`Next checkpoint: ${nxt.name}`:"Next checkpoint: Sun Gate";
+  const d=smoothPath(pts);
+  const flat=$("race-flat");
+  flat.innerHTML=`<svg id="race-svg" viewBox="0 0 360 960"><path id="race-trail" d="${d}" fill="none"/></svg>`;
+  const trail=$("race-trail");
+  const L=trail.getTotalLength();
+  if(!(L>1)) throw new Error("course");
+  const n=800, samples=[], cum=[0];
+  let prev=trail.getPointAtLength(0);
+  samples.push([prev.x, prev.y]);
+  for(let i=1;i<=n;i++){
+    const p=trail.getPointAtLength(L*i/n);
+    samples.push([p.x, p.y]);
+    cum.push(cum[i-1]+Math.hypot(p.x-prev.x, p.y-prev.y));
+    prev=p;
   }
-  $("mapnext").textContent=next;
-}
-function paintChips(active,mi){
-  const host=$("mapchips");
-  if(!host.childElementCount){
-    CHIP.forEach((name,i)=>{
-      const b=document.createElement("button");
-      b.type="button";b.className="tchip";b.dataset.i=String(i);
-      b.addEventListener("click",()=>{
-        flyToken++;flying=false;
-        viewI=i;
-        followLive=i===currentIndex(mapHold?mapHold.mi:0);
-        mapApply(true,true);
-      });
-      host.appendChild(b);
-    });
+  course={pts:samples, cum, L:cum[n], pathL:L};
+  const miles=[0,2.2,7.6,21.8,47.8];
+  const cols=["#3B5B85","#E8772E","#7C9A4E","#243B5C"];
+  let segs="";
+  for(let i=0;i<4;i++){
+    const a=miles[i]/TOTAL_MI*L, b=miles[i+1]/TOTAL_MI*L;
+    segs+=`<path d="${d}" fill="none" stroke="${cols[i]}" stroke-width="8" stroke-linecap="butt" stroke-linejoin="round" stroke-dasharray="${(b-a).toFixed(2)} ${(L+8).toFixed(2)}" stroke-dashoffset="${(-a).toFixed(2)}"/>`;
   }
-  [...host.children].forEach((b,i)=>{
-    const st=trailState(i,mi);
-    b.className="tchip"+(i===active?" on":"")+(st==="done"?" done":"")+(st==="lock"?" lock":"");
-    b.setAttribute("aria-pressed",i===active?"true":"false");
-    b.innerHTML=(st==="lock"?LOCK:"")+(st==="done"?"✓ ":"")+CHIP[i];
+  segs+=`<path d="${d}" fill="none" stroke="#FBF8F0" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="1.5 8" opacity=".8"/>`;
+  const bits=[];
+  function nameCard(title, sub, p, id){
+    const w=Math.max(108, Math.ceil(title.length*7.15+22));
+    const left=p.x>=175;
+    const cx=left?14+w/2:346-w/2;
+    const cy=Math.max(70, Math.min(900, p.y));
+    const edge=left?cx+w/2:cx-w/2;
+    const idAttr=id?` id="${id}"`:"";
+    return `<line x1="${p.x.toFixed(1)}" y1="${p.y.toFixed(1)}" x2="${edge.toFixed(1)}" y2="${cy.toFixed(1)}" stroke="#8A8C80" stroke-width="1"/>
+      <g transform="translate(${cx.toFixed(1)} ${cy.toFixed(1)})"><rect x="${(-w/2).toFixed(1)}" y="-17" width="${w.toFixed(1)}" height="34" rx="8" fill="#FBF8F0" stroke="#1E2419"/><text class="race-label" text-anchor="middle" y="-2">${title}</text><text class="race-note" text-anchor="middle" y="12"${idAttr}>${sub}</text></g>`;
+  }
+  const start=atFrac(0), gate=atFrac(1);
+  bits.push(nameCard("Riverside","2.2 mi · 4 AM", start, "race-start-label"));
+  bits.push(`<g transform="translate(${gate.x.toFixed(1)} ${(gate.y-2).toFixed(1)})"><line x1="-14" y1="14" x2="-14" y2="-12" stroke="#243B5C" stroke-width="3" stroke-linecap="round"/><line x1="14" y1="14" x2="14" y2="-12" stroke="#243B5C" stroke-width="3" stroke-linecap="round"/><path d="M-14,-12 Q0,-30 14,-12" fill="none" stroke="#E8772E" stroke-width="3"/><text class="race-label" text-anchor="middle" x="0" y="-40">Sun Gate</text></g>`);
+  [2.2,7.6,21.8].forEach(mi=>{
+    const p=atFrac(mi/TOTAL_MI);
+    bits.push(`<line x1="${(p.x+p.nx*14).toFixed(1)}" y1="${(p.y+p.ny*14).toFixed(1)}" x2="${(p.x-p.nx*14).toFixed(1)}" y2="${(p.y-p.ny*14).toFixed(1)}" stroke="#1E2419" stroke-width="2.4" stroke-linecap="round"/>`);
   });
+  [[4.9,"Angels Landing","5.4 mi"],[14.7,"Half Dome","14.2 mi"],[34.8,"Inca Trail","26.0 mi"]].forEach(item=>{
+    bits.push(nameCard(item[1], item[2], atFrac(item[0]/TOTAL_MI)));
+  });
+  [[13000,"13K"],[26000,"26K"],[39000,"39K"],[50000,"50K"],[63000,"63K"],[74000,"74K"],[85000,"85K"],[100000,"100K"]].forEach(f=>{
+    let frac=stepsToFrac(f[0]);
+    if(f[0]>=100000) frac=Math.min(frac,0.955);
+    const p=atFrac(frac);
+    const right=p.x<175;
+    const ox=right?20:-20;
+    const x=p.x+ox, y=p.y-16;
+    const dir=right?1:-1;
+    bits.push(`<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><line x1="0" y1="10" x2="0" y2="-14" stroke="#243B5C" stroke-width="1.5" stroke-linecap="round"/><path d="M0,-14 L${11*dir},-10.5 L0,-7 Z" fill="#E8772E"/><text class="race-flag" text-anchor="${dir>0?"start":"end"}" x="${dir>0?13:-13}" y="-6">${f[1]}</text></g>`);
+  });
+  flat.innerHTML=`<svg id="race-svg" viewBox="0 0 360 960" aria-hidden="true"><defs><linearGradient id="race-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D5DFEC"/><stop offset=".42" stop-color="#E7E4D8"/><stop offset=".72" stop-color="#F4EEDF"/><stop offset="1" stop-color="#E4EEF5"/></linearGradient></defs>
+  <rect width="360" height="960" fill="url(#race-sky)"/>
+  <circle cx="292" cy="40" r="16" fill="#FBF8F0" stroke="#E8772E" stroke-width="3"/>
+  <circle cx="292" cy="40" r="4.2" fill="#E8772E"/>
+  <path d="M0,168 L30,86 L62,146 L98,58 L136,132 L176,52 L214,128 L252,74 L292,138 L330,90 L360,146 L360,230 L0,230 Z" fill="#D5DFEC"/>
+  <path d="M0,214 L46,140 L86,198 L128,118 L170,196 L214,128 L262,194 L314,136 L360,186 L360,268 L0,268 Z" fill="#C5D4E8"/>
+  <path d="M0,268 L0,470 L52,420 L24,360 L58,312 L0,286 Z" fill="#D5DFEC"/>
+  <path d="M360,250 L360,500 L304,446 L336,372 L292,328 L338,270 Z" fill="#C9D6E6"/>
+  <path d="M238,640 C244,512 338,492 360,578 L360,676 L252,662 Z" fill="#E4ECD4" stroke="#7C9A4E" stroke-width="2.4" stroke-linejoin="round"/>
+  <path d="M304,560 Q334,516 354,566" fill="none" stroke="#56702F" stroke-width="2"/>
+  <path d="M0,748 L0,668 L50,702 L24,758 L62,824 L0,858 Z" fill="#F8D9C2"/>
+  <path d="M0,858 L40,918 L0,952 Z" fill="#F3C4A4"/>
+  <path d="M360,792 L306,752 L340,700 L286,678 L324,748 L272,792 L316,868 L360,910 Z" fill="#E8B898"/>
+  <path d="M0,888 C78,866 132,934 196,902 C258,872 308,934 360,906 L360,960 L0,960 Z" fill="#D5DFEC"/>
+  <path d="M18,928 C96,906 156,958 236,926 C286,906 324,948 348,934" fill="none" stroke="#3B5B85" stroke-width="2.6" stroke-linecap="round" opacity=".5"/>
+  <g fill="#7C9A4E" stroke="#56702F" stroke-width="1.2"><circle cx="46" cy="300" r="11"/><circle cx="318" cy="246" r="9"/><circle cx="38" cy="392" r="8"/><circle cx="322" cy="430" r="12"/></g>
+  <g stroke="#56702F" stroke-width="2" stroke-linecap="round"><line x1="46" y1="310" x2="46" y2="326"/><line x1="318" y1="254" x2="318" y2="268"/><line x1="38" y1="399" x2="38" y2="412"/><line x1="322" y1="441" x2="322" y2="458"/></g>
+  <path id="race-trail" d="${d}" fill="none" stroke="#1E2419" stroke-opacity=".2" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  ${segs}
+  ${bits.join("")}
+  <g id="runners">${runnerMarkup("last")}${runnerMarkup("pace")}${runnerMarkup("you")}</g>
+  </svg>`;
 }
-function mapApply(animate,force){
-  if(!mapReady||!mapHold)return;
-  const mi=mapHold.mi,steps=mapHold.steps;
-  const cur=currentIndex(mi);
-  if(followLive)viewI=cur;
-  const i=viewI,st=trailState(i,mi),frac=localFrac(i,mi);
-  const key=i+"|"+steps+"|"+mi.toFixed(3)+"|"+st;
-  if(!force&&key===lastKey)return;
-  const prev=lastKey?+lastKey.split("|")[0]:i;
-  lastKey=key;
-  drawLine(i,frac,st);
-  hud(i,mi,steps,st);
-  paintChips(i,mi);
-  const on=i===cur;
-  const p=alongIdx(i,frac);
-  if(on){
-    placeMarker(p,animate&&prev===i);
-    if(lockPin)lockPin.getElement().style.display="none";
-    if(!flying)followCam(i,frac,animate&&prev===i);
-  }else{
-    if(you)you.getElement().style.display="none";
-    markAt=null;
-    if(lockPin){
-      if(st==="lock"){lockPin.setLngLat(ROUTES[i][0]);lockPin.getElement().style.display=""}
-      else lockPin.getElement().style.display="none";
-    }
-    if(!flying)overview(i,animate);
-  }
-  const box=$("map");
-  if(box)box._pos={i:i,frac:frac,st:st,steps:steps,mi:mi,lng:p[0],lat:p[1]};
-}
-function flyTrail(){
-  if(!mapReady)return;
-  const i=viewI,token=++flyToken;
-  flying=true;
-  const dur=reduced()?1:9000,t0=performance.now(),zoom=FLYZ[i];
-  function frame(now){
-    if(token!==flyToken)return;
-    let u=Math.min(1,(now-t0)/dur);
-    const e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
-    const p=alongIdx(i,e),q=alongIdx(i,Math.min(1,e+0.03));
-    map.jumpTo({center:p,bearing:heading(p,q),pitch:60,zoom:zoom,padding:padCam()});
-    if(u<1)requestAnimationFrame(frame);
-    else{flying=false;mapApply(true,true)}
-  }
-  requestAnimationFrame(frame);
-}
-function makeYou(){const d=document.createElement("div");d.className="you";d.innerHTML="<i></i>";d.setAttribute("aria-label","Your position");return d}
-function makeLock(){const d=document.createElement("div");d.className="lockpin";d.innerHTML=LOCK.replace("11","14").replace("11","14");d.setAttribute("aria-label","Locked trail");return d}
-function startMap(){
-  const style={
-    version:8,
-    sources:{
-      esri:{type:"raster",tiles:["https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],tileSize:256,maxzoom:18,attribution:"Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community"},
-      dem:{type:"raster-dem",tiles:["https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"],tileSize:256,encoding:"terrarium",maxzoom:12,attribution:"Terrain: AWS Terrain Tiles (Mapzen terrarium)"}
+let raceGL=null;
+function boot3d(){
+  const canvas=$("race-gl");
+  if(!canvas) return;
+  const load=$("race-load");
+  load.classList.add("on");
+  import("./assets/race3d.js").then(mod=>mod.startRace3D({
+    canvas:canvas,
+    stage:$("racestage"),
+    recenterBtn:$("race-recenter"),
+    fade:$("race-fade"),
+    loadFill:$("race-load-fill"),
+    getShown:()=>shown,
+    getJobs:()=>jobs,
+    getRace:()=>raceCur,
+    reduced:reduced,
+    GOAL:GOAL,
+    publish:publish,
+    onReady(api){
+      raceGL=api;
+      window.raceGL=api;
+      $("viewrace")._gl=api;
+      document.body.classList.add("stage-3d");
+      canvas.hidden=false;
+      $("race-recenter").hidden=false;
+      ["you","pace","last"].forEach(api.place);
+      api.resize();
+      api.recenter();
+      api.renderOnce();
+      api.resume();
+      load.classList.remove("on");
+      publish();
     },
-    layers:[
-      {id:"sat",type:"raster",source:"esri"},
-      {id:"hill",type:"hillshade",source:"dem",paint:{"hillshade-exaggeration":0.32,"hillshade-shadow-color":"#243B5C","hillshade-highlight-color":"#F4EEDF","hillshade-accent-color":"#7C9A4E"}}
-    ],
-    terrain:{source:"dem",exaggeration:1.5}
-  };
-  const sky={"sky-color":"#9BB6D4","horizon-color":"#F4EEDF","fog-color":"#E4D3C0","sky-horizon-blend":0.58,"horizon-fog-blend":0.68,"fog-ground-blend":0.42,"atmosphere-blend":0.5};
-  const opts={
-    container:"map",style:style,center:ROUTES[viewI][0],zoom:Z[viewI],pitch:60,bearing:0,
-    maxPitch:72,minZoom:2,maxZoom:16,attributionControl:false,fadeDuration:0,
-    pixelRatio:Math.min(window.devicePixelRatio||1,2),refreshExpiredTiles:false,failIfMajorPerformanceCaveat:false
-  };
-  try{map=new maplibregl.Map(opts)}
-  catch(e){
-    try{map=new maplibregl.Map(opts)}catch(e2){showLadder("The 3D map couldn't start in this browser, so the ladder is showing.");return}
-  }
-  map.addControl(new maplibregl.AttributionControl({compact:true,customAttribution:"Routes © OpenStreetMap"}),"top-right");
-  map.addControl(new maplibregl.NavigationControl({showCompass:true,showZoom:false,visualizePitch:true}),"top-left");
-  map.on("error",e=>{
-    const m=String(e&&e.error&&e.error.message||"");
-    if(/webgl|WebGL|context/.test(m)&&!mapReady)showLadder("The 3D map couldn't start in this browser, so the ladder is showing.");
+    onFail(){ load.classList.remove("on"); }
+  })).catch(e=>{
+    console.warn("Race 3D unavailable, using the flat course.", e);
+    load.classList.remove("on");
   });
-  map.on("webglcontextcreationerror",()=>showLadder("The 3D map couldn't start in this browser, so the ladder is showing."));
-  map.on("dragstart",()=>{flyToken++;flying=false});
-  map.on("load",()=>{
-    try{if(map.setSky)map.setSky(sky)}catch(e){}
-    try{if(!map.getTerrain())map.setTerrain({source:"dem",exaggeration:1.5})}catch(e){}
-    map.addSource("route",{type:"geojson",data:{type:"FeatureCollection",features:[]}});
-    const layout={"line-cap":"round","line-join":"round"};
-    map.addLayer({id:"route-case",type:"line",source:"route",layout:layout,paint:{"line-color":"#243B5C","line-width":8,"line-opacity":0.5}});
-    map.addLayer({id:"route-rest",type:"line",source:"route",filter:["==",["get","part"],"rest"],layout:layout,paint:{"line-color":"#FBF8F0","line-width":4,"line-opacity":0.94}});
-    map.addLayer({id:"route-done",type:"line",source:"route",filter:["==",["get","part"],"done"],layout:layout,paint:{"line-color":"#E8772E","line-width":5}});
-    you=new maplibregl.Marker({element:makeYou(),anchor:"center"}).setLngLat(ROUTES[0][0]).addTo(map);
-    lockPin=new maplibregl.Marker({element:makeLock(),anchor:"center"}).setLngLat(ROUTES[0][0]).addTo(map);
-    lockPin.getElement().style.display="none";
-    const box=$("map");box._ml=map;box._you=you;
-    mapReady=true;
-    map.resize();
-    mapApply(false,true);
-  });
-  $("flybtn").addEventListener("click",flyTrail);
 }
-function init3d(){
-  $("tabmap").addEventListener("click",()=>{if(!$("tabmap").disabled){flyToken++;flying=false;setTab("map")}});
-  $("tablad").addEventListener("click",()=>{flyToken++;flying=false;setTab("ladder")});
-  let ok=false;
-  try{
-    const c=document.createElement("canvas");
-    ok=!!(window.maplibregl&&maplibregl.Map&&(c.getContext("webgl2",{failIfMajorPerformanceCaveat:false})||c.getContext("webgl",{failIfMajorPerformanceCaveat:false})));
-  }catch(e){ok=false}
-  if(!ok){showLadder("The 3D map couldn't start in this browser, so the ladder is showing.");return}
-  setTab("map");
-  void $("map").offsetWidth;
-  startMap();
+function initRace(){
+  $("tabrace").addEventListener("click",()=>setTab("race"));
+  $("tablad").addEventListener("click",()=>setTab("ladder"));
+  raceRate=loadRate();
+  renderRate();
+  $("rate-dec").addEventListener("click",()=>bumpRate(-1));
+  $("rate-inc").addEventListener("click",()=>bumpRate(1));
+  buildCourse();
+  raceReady=true;
+  setTab("race");
+  paint("boot");
+  setInterval(()=>{ if(raceReady) paint("tick"); }, 3000);
+  window.addEventListener("resize",()=>{ if(document.body.classList.contains("mode-race")&&!document.body.classList.contains("stage-3d")) frameRunners(false); });
+  boot3d();
 }
-
 buildPanels();render();poll();setInterval(poll,60000);
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)poll()});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)poll(); if(raceGL){ if(document.hidden) raceGL.pause(); else raceGL.resume(); }});
 const pubUrl="https://ntfy.sh/"+encodeURIComponent(TOPIC)+"/publish?message=";
 const pubField=$("puburl");
 pubField.value=pubUrl;
@@ -631,7 +848,7 @@ $("copyurl").addEventListener("click",async()=>{
   clearTimeout(copyTimer);
   copyTimer=setTimeout(()=>{btn.textContent="Copy URL"},2000);
 });
-init3d();
+initRace();
 </script>
 </body>
 </html>
