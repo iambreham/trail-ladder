@@ -780,7 +780,7 @@ function boot3d(){
     THREE=mods[0];
     GLTFLoader=mods[1].GLTFLoader;
     OrbitControls=mods[2].OrbitControls;
-    SkeletonUtils=mods[3].SkeletonUtils;
+    SkeletonUtils=mods[3];
     start3d(THREE, GLTFLoader, OrbitControls, SkeletonUtils, canvas);
   }).catch(e=>{
     console.warn("Race 3D unavailable, using the flat course.", e);
@@ -855,6 +855,7 @@ function start3d(THREE, GLTFLoader, OrbitControls, SkeletonUtils, canvas){
     ["you","pace","last"].forEach(place3d);
     resize();
     recenter();
+    renderer.render(scene, camera);
     resume();
     publish();
   }, undefined, e=>{
@@ -893,18 +894,21 @@ function start3d(THREE, GLTFLoader, OrbitControls, SkeletonUtils, canvas){
     if(!loopOn) return;
     raf=requestAnimationFrame(tick);
     const dt=Math.min(0.05, clock.getDelta());
+    let animChanged=false;
     ["you","pace","last"].forEach(key=>{
       const r=runners[key];
       if(!r) return;
       const moving=wantsRun(key);
       if(moving!==r.moving){
         r.moving=moving;
+        animChanged=true;
         const next=moving?r.run:r.idle, prev=moving?r.idle:r.run;
         next.reset().fadeIn(0.18).play();
         prev.fadeOut(0.18);
       }
       r.mixer.update(dt);
     });
+    if(animChanged) publish();
     frameCam();
     renderer.render(scene, camera);
   }
