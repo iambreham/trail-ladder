@@ -169,6 +169,8 @@ body.mode-ladder #viewrace{display:none}
     <div aria-live="polite">
       <p class="raceline note" id="race-vs-pace">The day starts at 4:00 AM ET.</p>
       <p class="raceline note" id="race-vs-last">Everyone is on the start line.</p>
+      <p class="raceline note" id="race-eta-hour">At your last-hour pace: need more syncs</p>
+      <p class="raceline note" id="race-eta-day">At your day average: not moving</p>
     </div>
     <ul class="racelegend">
       <li><i class="sw you"></i><span>You</span><b id="race-you-n">0</b></li>
@@ -250,6 +252,15 @@ const etParts=d=>{const p={};new Intl.DateTimeFormat("en-US",{timeZone:TZ,year:"
 const etDate=d=>{const p=etParts(d);return p.year+"-"+p.month+"-"+p.day};
 const etHour=d=>{const p=etParts(d);return (+p.hour)+(+p.minute)/60};
 const etTime=d=>new Intl.DateTimeFormat("en-US",{timeZone:TZ,hour:"numeric",minute:"2-digit"}).format(d);
+function etStamp(day,hh,mm){
+  const h=String(hh).padStart(2,"0"), m=String(mm).padStart(2,"0");
+  for(const off of ["-04:00","-05:00"]){
+    const d=new Date(day+"T"+h+":"+m+":00"+off);
+    const p=etParts(d);
+    if(etDate(d)===day && +p.hour===hh && +p.minute===mm) return d;
+  }
+  return new Date(day+"T"+h+":"+m+":00Z");
+}
 const hLabel=h=>{const hh=h%12||12;return hh+(h<12?" AM":" PM")};
 function expectedAt(h){if(h<=5)return 0;if(h>=21)return GOAL;for(let i=1;i<PACE_PTS.length;i++){const[a,av]=PACE_PTS[i-1],[b,bv]=PACE_PTS[i];if(h<=b)return av+(bv-av)*(h-a)/(b-a)}return GOAL}
 function parseVal(msg){
@@ -494,6 +505,63 @@ function writeStatus(m){
   $("race-you-n").textContent=fmt(m.phase==="pre"?0:keptSteps);
   $("race-pace-n").textContent=fmt(m.pace);
   $("race-last-n").textContent=fmt(Math.min(m.last, m.pace));
+  updateEta();
+}
+function validReadings(hist){
+  return hist.filter(x=>!x.err && x.d && Number.isFinite(x.best)).slice().sort((a,b)=>a.d-b.d);
+}
+function lastHourPace(hist){
+  const pts=validReadings(hist);
+  if(pts.length<2) return {short:true};
+  const latest=pts[pts.length-1];
+  if(latest.d-pts[0].d<20*60*1000) return {short:true};
+  const target=latest.d.getTime()-60*60*1000;
+  let base=pts[0];
+  for(let i=1;i<pts.length-1;i++){
+    const da=Math.abs(pts[i].d-target), db=Math.abs(base.d-target);
+    if(da<db || (da===db && pts[i].d<base.d)) base=pts[i];
+  }
+  const hours=(latest.d-base.d)/3600000;
+  if(!(hours>0)) return {short:true};
+  return {rate:(latest.best-base.best)/hours, at:latest.d};
+}
+function dayAveragePace(steps, hist, now){
+  const pts=validReadings(hist);
+  const at=pts.length?pts[pts.length-1].d:null;
+  const hours=(now-etStamp(etDate(now),4,0))/3600000;
+  if(!(hours>0)) return {rate:0, at};
+  return {rate:steps/hours, at};
+}
+function paintEta(el, label, info, steps, now){
+  if(!el) return;
+  el.className="raceline";
+  const known=info && Number.isFinite(info.rate);
+  const rateBit=known?" ("+fmt(info.rate)+"/hr)":"";
+  if(steps>=GOAL){
+    el.textContent=label+rateBit+": Finished";
+    el.classList.add("ok");
+    return;
+  }
+  if(info && info.short){
+    el.textContent=label+": need more syncs";
+    el.classList.add("note");
+    return;
+  }
+  if(!known || !(info.rate>0) || !info.at){
+    el.textContent=label+rateBit+": not moving";
+    el.classList.add("note");
+    return;
+  }
+  const eta=new Date(info.at.getTime()+((GOAL-steps)/info.rate)*3600000);
+  const late=eta.getTime()>etStamp(etDate(now),22,0).getTime();
+  el.textContent=label+rateBit+": finish by "+etTime(eta)+(late?" (after 10 PM)":"");
+  el.classList.add(late?"bad":"ok");
+}
+function updateEta(){
+  const now=new Date();
+  const data=dayData(now);
+  paintEta($("race-eta-hour"), "At your last-hour pace", lastHourPace(data.hist), data.steps, now);
+  paintEta($("race-eta-day"), "At your day average", dayAveragePace(data.steps, data.hist, now), data.steps, now);
 }
 function publish(){
   const root=$("viewrace");
