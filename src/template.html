@@ -244,7 +244,8 @@ const TRAILS=[
  {name:"Inca Trail",park:"Peru · Km 82 to Machu Picchu",start:21.8,end:47.8,col:"var(--denim)",lms:[["Km 82 trailhead",21.8,0,-9,"start"],["Wayllabamba",29.3,0,16,"middle"],["Dead Woman's Pass",34.8,0,-10,"middle"],["Pacaymayo",36.1,4,16,"start"],["Wiñay Wayna",44.5,0,16,"middle"],["Sun Gate · Machu Picchu",47.8,0,-10,"end"]],
   prof:[[0,.12],[.15,.2],[.288,.3],[.4,.62],[.5,.94],[.55,.62],[.62,.82],[.7,.66],[.76,.74],[.873,.36],[.94,.42],[1,.46]],sky:[[0,.5],[.15,.7],[.3,.62],[.5,.99],[.65,.8],[.8,.9],[1,.6]]}
 ];
-const CPS=[[7,13000,""],[9,26000,""],[11,39000,""],[13,50000,"Bail-out check"],[15,63000,""],[17,74000,"Walking call with Jaime"],[19,85000,""],[21,100000,"Finish"]];
+const FINISH_H=21+50/60;
+const CPS=[[7,13000,""],[9,26000,""],[11,39000,""],[13,50000,"Bail-out check"],[15,63000,""],[17,76000,"Bank steps before the call"],[18,79000,"Walking call with Jaime"],[19,84500,""],[20,90000,""],[21,95500,""],[FINISH_H,100000,"Finish"]];
 const PACE_PTS=[[5,0],...CPS.map(c=>[c[0],c[1]])];
 const $=id=>document.getElementById(id);
 const fmt=n=>Math.round(n).toLocaleString("en-US");
@@ -261,8 +262,8 @@ function etStamp(day,hh,mm){
   }
   return new Date(day+"T"+h+":"+m+":00Z");
 }
-const hLabel=h=>{const hh=h%12||12;return hh+(h<12?" AM":" PM")};
-function expectedAt(h){if(h<=5)return 0;if(h>=21)return GOAL;for(let i=1;i<PACE_PTS.length;i++){const[a,av]=PACE_PTS[i-1],[b,bv]=PACE_PTS[i];if(h<=b)return av+(bv-av)*(h-a)/(b-a)}return GOAL}
+const hLabel=h=>{const whole=Math.floor(h+1e-6);const mins=Math.round((h-whole)*60);const hh=whole%12||12;const ap=whole<12?" AM":" PM";return mins?hh+":"+String(mins).padStart(2,"0")+ap:hh+ap};
+function expectedAt(h){if(h<=5)return 0;if(h>=FINISH_H)return GOAL;for(let i=1;i<PACE_PTS.length;i++){const[a,av]=PACE_PTS[i-1],[b,bv]=PACE_PTS[i];if(h<=b)return av+(bv-av)*(h-a)/(b-a)}return GOAL}
 function parseVal(msg){
   if(msg==null)return {err:"empty"};let s=String(msg).trim();
   if(/^reset$/i.test(s))return {reset:true};
@@ -352,7 +353,7 @@ function render(){
     pv.textContent=(ahead?"+":"−")+fmt(Math.abs(diff));
     let s=ahead?"steps ahead of the checkpoint pace for "+etTime(now)+" ET.":"steps behind the checkpoint pace for "+etTime(now)+" ET.";
     if(nextCp){const need=Math.max(0,nextCp[1]-steps);s+=need>0?" Next: "+fmt(nextCp[1])+" by "+hLabel(nextCp[0])+" ("+fmt(need)+" to go"+(nextCp[2]?", "+nextCp[2].toLowerCase():"")+").":" "+hLabel(nextCp[0])+" target ("+fmt(nextCp[1])+") already banked.";}
-    else s+=steps>=GOAL?" 100K done.":" The 9 PM finish has passed.";
+    else s+=steps>=GOAL?" 100K done.":" The 9:50 PM finish has passed.";
     if(h>=13&&steps<50000)s+=" Bail-out rule: under 50K at 1 PM means stop for the day.";
     pt.textContent=s;
   }
@@ -418,7 +419,7 @@ function raceClock(d){
 }
 function racePaceAt(h){
   if(h<=4) return 0;
-  if(h>=21) return GOAL;
+  if(h>=FINISH_H) return GOAL;
   for(let i=1;i<RACE_PTS.length;i++){
     const a=RACE_PTS[i-1], b=RACE_PTS[i];
     if(h<=b[0]) return a[1]+(b[1]-a[1])*(h-a[0])/(b[0]-a[0]);
