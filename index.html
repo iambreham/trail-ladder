@@ -125,6 +125,7 @@ body.mode-ladder #viewrace{display:none}
 .stepper button{width:44px;height:44px;border:0;background:transparent;color:var(--denim-d);font-size:22px;line-height:1;cursor:pointer;touch-action:manipulation}
 .stepper button:disabled{color:var(--ink3);cursor:default}
 .stepper output{min-width:96px;text-align:center;font-weight:700;font-size:13.5px;font-variant-numeric:tabular-nums}
+.ratefixed{flex:0 0 auto;font-weight:700;font-size:13.5px;font-variant-numeric:tabular-nums;padding:12px 14px;border:1px solid var(--rule);border-radius:999px;background:var(--paper)}
 .runner-name{font-family:var(--sans);font-size:12px;font-weight:700;fill:#1E2419}
 .runner-steps{font-family:var(--sans);font-size:11px;font-weight:700;fill:#1E2419}
 .px{shape-rendering:crispEdges}
@@ -178,13 +179,9 @@ body.mode-ladder #viewrace{display:none}
     <div class="ratebox">
       <div>
         <div class="kicker">Max rate</div>
-        <p class="ratehint">Last chance is 100K minus this hourly pace times the hours left until 10 PM.</p>
+        <p class="ratehint">Last chance is 100K minus 8,000 steps per hour times the hours left until 10 PM.</p>
       </div>
-      <div class="stepper" role="group" aria-label="Max steps per hour">
-        <button type="button" id="rate-dec" aria-label="Lower max rate">−</button>
-        <output id="rate-val">8,000 / hr</output>
-        <button type="button" id="rate-inc" aria-label="Raise max rate">+</button>
-      </div>
+      <div class="ratefixed" id="rate-val">8,000 / hr</div>
     </div>
   </div>
 </div>
@@ -230,7 +227,7 @@ body.mode-ladder #viewrace{display:none}
 </div>
 <script>
 const TOPIC="trail100k-lKXUi4zyDnUyW7fUTVFR4yMB";
-const SPM=2100, GOAL=100000, TOTAL_MI=47.8, MAX_STEPS=150000;
+const SPM=2100, GOAL=100000, TOTAL_MI=47.8, MAX_STEPS=150000, MAX_RATE=8000;
 const TZ="America/New_York";
 const TRAILS=[
  {name:"Riverside Walk",park:"Zion National Park, Utah",start:0,end:2.2,col:"var(--denim)",lms:[["Temple of Sinawava",0,0,-10,"start"],["End of pavement · the Narrows",1.1,0,18,"middle"]],
@@ -384,8 +381,7 @@ function render(){
   try{syncRace(steps)}catch(e){}
 }
 const RACE_PTS=[[4,0],...CPS.map(c=>[c[0],c[1]])];
-const RATE_KEY="trail100k_rate";
-let raceReady=false, raceRate=8000, keptSteps=0, racePrimed=false, raceFramed=false;
+let raceReady=false, keptSteps=0, racePrimed=false, raceFramed=false;
 let course=null;
 const shown={you:0,pace:0,last:0};
 const goalFrac={you:0,pace:0,last:0};
@@ -414,24 +410,10 @@ function racePaceAt(h){
   }
   return GOAL;
 }
-function lastChanceAt(h, r){
+function lastChanceAt(h){
   if(h<4) return 0;
-  return Math.max(0, GOAL-r*Math.max(0, 22-h));
-}
-function loadRate(){
-  try{
-    const n=Number(localStorage.getItem(RATE_KEY));
-    if(Number.isFinite(n)){
-      const r=Math.round(n/500)*500;
-      if(r>=5000&&r<=10000) return r;
-    }
-  }catch(e){}
-  return 8000;
-}
-function renderRate(){
-  $("rate-val").textContent=fmt(raceRate)+" / hr";
-  $("rate-dec").disabled=raceRate<=5000;
-  $("rate-inc").disabled=raceRate>=10000;
+  const hoursLeft=Math.max(0, 22-h);
+  return Math.max(0, GOAL-MAX_RATE*hoursLeft);
 }
 function stepsToFrac(steps){
   return Math.max(0, Math.min(1, Math.max(0, steps)/SPM/TOTAL_MI));
@@ -447,7 +429,9 @@ function youPlace(steps){
 function modelAt(h){
   const phase=h<4?"pre":h>=22?"post":"live";
   if(phase==="pre") return {phase,h,pace:0,last:0,you:0};
-  return {phase,h,pace:racePaceAt(h),last:lastChanceAt(h, raceRate),you:keptSteps};
+  const pace=racePaceAt(h);
+  const last=Math.min(lastChanceAt(h), pace);
+  return {phase,h,pace,last,you:keptSteps};
 }
 function writeStatus(m){
   $("race-steps").textContent=fmt(keptSteps);
@@ -465,21 +449,22 @@ function writeStatus(m){
     lastEl.classList.add("note");
   }else{
     $("race-kicker").textContent=m.phase==="post"?"Final result":"On the course";
-    const diff=Math.round(keptSteps-m.pace);
-    if(diff>=0){paceEl.textContent=fmt(diff)+" steps ahead of pace"; paceEl.classList.add("ok")}
-    else{paceEl.textContent=fmt(-diff)+" steps behind pace"; paceEl.classList.add("bad")}
-    const youR=Math.round(keptSteps), lastR=Math.round(m.last);
+    const youR=Math.round(keptSteps), paceR=Math.round(m.pace), lastR=Math.min(Math.round(m.last), paceR);
+    const ahead=youR-paceR;
+    if(ahead>=0){paceEl.textContent=fmt(ahead)+" steps ahead of pace"; paceEl.classList.add("ok")}
+    else{paceEl.textContent=fmt(-ahead)+" steps behind pace"; paceEl.classList.add("bad")}
+    const cushion=ahead>=0?Math.max(youR-lastR, ahead):youR-lastR;
     if(youR<lastR){
       lastEl.textContent="Below the last-chance line: 100K isn't reachable at your max rate";
       lastEl.classList.add("bad");
     }else{
-      lastEl.textContent=fmt(youR-lastR)+" steps of cushion before last chance";
+      lastEl.textContent=fmt(cushion)+" steps of cushion before last chance";
       lastEl.classList.add("ok");
     }
   }
-  $("race-you-n").textContent=fmt(m.you);
+  $("race-you-n").textContent=fmt(m.phase==="pre"?0:keptSteps);
   $("race-pace-n").textContent=fmt(m.pace);
-  $("race-last-n").textContent=fmt(m.last);
+  $("race-last-n").textContent=fmt(Math.min(m.last, m.pace));
 }
 function publish(){
   const root=$("viewrace");
@@ -487,7 +472,7 @@ function publish(){
   root._state={
     you:shown.you, pace:shown.pace, last:shown.last,
     youSteps:raceCur.you, paceSteps:raceCur.pace, lastSteps:raceCur.last,
-    kept:keptSteps, phase:raceCur.phase, rate:raceRate, h:raceCur.h,
+    kept:keptSteps, phase:raceCur.phase, rate:MAX_RATE, h:raceCur.h,
     busy:!!(jobs.you||jobs.pace||jobs.last),
     where:$("race-where").textContent,
     mi:$("race-mi").textContent,
@@ -710,14 +695,6 @@ function syncRace(steps){
   if(changed) paint("you");
   else { raceCur=modelAt(etHourExact(new Date())); writeStatus(raceCur); publish(); }
 }
-function bumpRate(dir){
-  const next=Math.max(5000, Math.min(10000, raceRate+dir*500));
-  if(next===raceRate) return;
-  raceRate=next;
-  try{localStorage.setItem(RATE_KEY, String(raceRate))}catch(e){}
-  renderRate();
-  if(raceReady) paint("rate");
-}
 function setTab(which){
   const race=which!=="ladder";
   document.body.classList.toggle("mode-race", race);
@@ -875,10 +852,6 @@ function buildCourse(){
 function initRace(){
   $("tabrace").addEventListener("click",()=>setTab("race"));
   $("tablad").addEventListener("click",()=>setTab("ladder"));
-  raceRate=loadRate();
-  renderRate();
-  $("rate-dec").addEventListener("click",()=>bumpRate(-1));
-  $("rate-inc").addEventListener("click",()=>bumpRate(1));
   buildCourse();
   raceReady=true;
   setTab("race");
