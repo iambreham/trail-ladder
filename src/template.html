@@ -125,7 +125,6 @@ body.mode-ladder #viewrace{display:none}
 .stepper button{width:44px;height:44px;border:0;background:transparent;color:var(--denim-d);font-size:22px;line-height:1;cursor:pointer;touch-action:manipulation}
 .stepper button:disabled{color:var(--ink3);cursor:default}
 .stepper output{min-width:96px;text-align:center;font-weight:700;font-size:13.5px;font-variant-numeric:tabular-nums}
-.ratefixed{flex:0 0 auto;font-weight:700;font-size:13.5px;font-variant-numeric:tabular-nums;padding:12px 14px;border:1px solid var(--rule);border-radius:999px;background:var(--paper)}
 .runner-name{font-family:var(--sans);font-size:12px;font-weight:700;fill:#1E2419}
 .runner-steps{font-family:var(--sans);font-size:11px;font-weight:700;fill:#1E2419}
 .px{shape-rendering:crispEdges}
@@ -179,9 +178,13 @@ body.mode-ladder #viewrace{display:none}
     <div class="ratebox">
       <div>
         <div class="kicker">Max rate</div>
-        <p class="ratehint">Last chance is 100K minus 8,000 steps per hour times the hours left until 10 PM.</p>
+        <p class="ratehint" id="rate-hint">Last chance is 100K minus 6,000 steps per hour times the hours left until 10 PM.</p>
       </div>
-      <div class="ratefixed" id="rate-val">8,000 / hr</div>
+      <div class="stepper" role="group" aria-label="Max steps per hour">
+        <button type="button" id="rate-dec" aria-label="Lower max rate by 500">−</button>
+        <output id="rate-val">6,000 / hr</output>
+        <button type="button" id="rate-inc" aria-label="Raise max rate by 500">+</button>
+      </div>
     </div>
   </div>
 </div>
@@ -227,7 +230,7 @@ body.mode-ladder #viewrace{display:none}
 </div>
 <script>
 const TOPIC="__TOPIC__";
-const SPM=2100, GOAL=100000, TOTAL_MI=47.8, MAX_STEPS=150000, MAX_RATE=8000;
+const SPM=2100, GOAL=100000, TOTAL_MI=47.8, MAX_STEPS=150000, MAX_RATE=6000;
 const TZ="America/New_York";
 const TRAILS=[
  {name:"Riverside Walk",park:"Zion National Park, Utah",start:0,end:2.2,col:"var(--denim)",lms:[["Temple of Sinawava",0,0,-10,"start"],["End of pavement · the Narrows",1.1,0,18,"middle"]],
@@ -381,7 +384,8 @@ function render(){
   try{syncRace(steps)}catch(e){}
 }
 const RACE_PTS=[[4,0],...CPS.map(c=>[c[0],c[1]])];
-let raceReady=false, keptSteps=0, racePrimed=false, raceFramed=false;
+const RATE_KEY="trail100k_maxrate";
+let raceReady=false, raceRate=MAX_RATE, keptSteps=0, racePrimed=false, raceFramed=false;
 let course=null;
 const shown={you:0,pace:0,last:0};
 const goalFrac={you:0,pace:0,last:0};
@@ -413,7 +417,32 @@ function racePaceAt(h){
 function lastChanceAt(h){
   if(h<4) return 0;
   const hoursLeft=Math.max(0, 22-h);
-  return Math.max(0, GOAL-MAX_RATE*hoursLeft);
+  return Math.max(0, GOAL-raceRate*hoursLeft);
+}
+function loadRate(){
+  try{localStorage.removeItem("trail100k_rate")}catch(e){}
+  try{
+    const n=Number(localStorage.getItem(RATE_KEY));
+    if(Number.isFinite(n)){
+      const r=Math.round(n/500)*500;
+      if(r>=5000&&r<=10000) return r;
+    }
+  }catch(e){}
+  return MAX_RATE;
+}
+function renderRate(){
+  $("rate-val").textContent=fmt(raceRate)+" / hr";
+  $("rate-hint").textContent="Last chance is 100K minus "+fmt(raceRate)+" steps per hour times the hours left until 10 PM.";
+  $("rate-dec").disabled=raceRate<=5000;
+  $("rate-inc").disabled=raceRate>=10000;
+}
+function bumpRate(dir){
+  const next=Math.max(5000, Math.min(10000, raceRate+dir*500));
+  if(next===raceRate) return;
+  raceRate=next;
+  try{localStorage.setItem(RATE_KEY, String(raceRate))}catch(e){}
+  renderRate();
+  if(raceReady) paint("rate");
 }
 function stepsToFrac(steps){
   return Math.max(0, Math.min(1, Math.max(0, steps)/SPM/TOTAL_MI));
@@ -472,7 +501,7 @@ function publish(){
   root._state={
     you:shown.you, pace:shown.pace, last:shown.last,
     youSteps:raceCur.you, paceSteps:raceCur.pace, lastSteps:raceCur.last,
-    kept:keptSteps, phase:raceCur.phase, rate:MAX_RATE, h:raceCur.h,
+    kept:keptSteps, phase:raceCur.phase, rate:raceRate, h:raceCur.h,
     busy:!!(jobs.you||jobs.pace||jobs.last),
     where:$("race-where").textContent,
     mi:$("race-mi").textContent,
@@ -852,6 +881,10 @@ function buildCourse(){
 function initRace(){
   $("tabrace").addEventListener("click",()=>setTab("race"));
   $("tablad").addEventListener("click",()=>setTab("ladder"));
+  raceRate=loadRate();
+  renderRate();
+  $("rate-dec").addEventListener("click",()=>bumpRate(-1));
+  $("rate-inc").addEventListener("click",()=>bumpRate(1));
   buildCourse();
   raceReady=true;
   setTab("race");
