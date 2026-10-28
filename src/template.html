@@ -12,9 +12,6 @@
 <link rel="apple-touch-icon" href="__ICON180__">
 <link rel="icon" type="image/png" href="__ICON180__">
 <link rel="manifest" href="__MANIFEST__">
-<script type="importmap">
-{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
-</script>
 <style>
 :root{--matcha:#7C9A4E;--matcha-d:#56702F;--matcha-l:#DCE5C6;--denim:#3B5B85;--denim-d:#243B5C;--denim-l:#D5DFEC;--orange:#E8772E;--orange-l:#F8D9C2;--paper:#F4EEDF;--card:#FBF8F0;--ink:#1E2419;--ink2:#4F5547;--ink3:#8A8C80;--rule:#DCD4C0;
 --serif:"Iowan Old Style","Charter","Palatino Linotype",Palatino,Georgia,serif;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;}
@@ -96,8 +93,7 @@ body.mode-race .tabbar{flex:0 0 auto;width:100%}
 body.mode-race #viewladder{display:none}
 body.mode-ladder #viewrace{display:none}
 #viewrace{display:flex;flex-direction:column;flex:1;min-height:0;width:min(560px,100%);align-self:center}
-.racestage{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;background:
-  linear-gradient(#D5DFEC,#F4EEDF 42%,#F4EEDF)}
+.racestage{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;background:var(--paper)}
 #race-svg{width:100%;height:auto;display:block}
 .race-label{font-family:var(--serif);font-weight:700;fill:var(--ink);font-size:13px}
 .race-sub{font-family:var(--sans);font-size:9px;letter-spacing:.08em;text-transform:uppercase;fill:var(--ink2);font-weight:650}
@@ -129,44 +125,20 @@ body.mode-ladder #viewrace{display:none}
 .stepper button{width:44px;height:44px;border:0;background:transparent;color:var(--denim-d);font-size:22px;line-height:1;cursor:pointer;touch-action:manipulation}
 .stepper button:disabled{color:var(--ink3);cursor:default}
 .stepper output{min-width:96px;text-align:center;font-weight:700;font-size:13.5px;font-variant-numeric:tabular-nums}
-.runner .leg,.runner .arm{transform-box:fill-box;transform-origin:center top}
-.runner .bob{transform-box:fill-box;transform-origin:center bottom}
-.runner .leg.a{transform:rotate(16deg)}
-.runner .leg.b{transform:rotate(-16deg)}
-.runner .arm.a{transform:rotate(-14deg)}
-.runner .arm.b{transform:rotate(16deg)}
-.runner.run .leg.a{animation:stride .45s ease-in-out infinite}
-.runner.run .leg.b{animation:stride .45s ease-in-out infinite reverse}
-.runner.run .arm.a{animation:armswing .45s ease-in-out infinite}
-.runner.run .arm.b{animation:armswing .45s ease-in-out infinite reverse}
-.runner.run .bob{animation:bob .45s ease-in-out infinite}
-.runner.run .pony{transform-box:fill-box;transform-origin:0% 30%;animation:pony .45s ease-in-out infinite}
-.runner.ghost{opacity:.8}
-.runner.ghost .token{stroke-dasharray:1.7 1.7}
-@keyframes stride{0%,100%{transform:rotate(24deg)}50%{transform:rotate(-24deg)}}
-@keyframes armswing{0%,100%{transform:rotate(18deg)}50%{transform:rotate(-18deg)}}
-@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.5px)}}
-@keyframes pony{0%,100%{transform:rotate(8deg)}50%{transform:rotate(-16deg)}}
+.runner-name{font-family:var(--sans);font-size:12px;font-weight:700;fill:#1E2419}
+.runner-steps{font-family:var(--sans);font-size:11px;font-weight:700;fill:#1E2419}
+.px{shape-rendering:crispEdges}
+.runner .fr.b{opacity:0}
+.runner.run .fr.a{animation:fa .42s steps(1,end) infinite}
+.runner.run .fr.b{animation:fb .42s steps(1,end) infinite}
+.runner.ghost .body{opacity:.8}
+@keyframes fa{0%,49.9%{opacity:1}50%,100%{opacity:0}}
+@keyframes fb{0%,49.9%{opacity:0}50%,100%{opacity:1}}
 @media (prefers-reduced-motion:reduce){
-  .runner.run .leg,.runner.run .arm,.runner.run .bob,.runner.run .pony{animation:none}
+  .runner.run .fr.a,.runner.run .fr.b{animation:none}
+  .runner.run .fr.b{opacity:0}
 }
-
-.racestage{position:relative}
-#race-gl{position:absolute;inset:0;width:100%;height:100%;display:none;touch-action:none}
 #race-flat{min-height:100%}
-body.stage-3d #race-gl{display:block}
-body.stage-3d #race-flat{display:none}
-body.stage-3d .racestage{overflow:hidden;touch-action:none;background:#D5DFEC}
-#race-recenter{position:absolute;z-index:3;top:10px;right:10px;min-height:44px;padding:8px 14px;border:1px solid var(--ink);border-radius:999px;background:var(--card);color:var(--ink);font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer;touch-action:manipulation}
-#race-recenter:focus-visible{outline:2px solid var(--denim);outline-offset:2px}
-#race-load{position:absolute;inset:0;z-index:4;display:none;align-items:flex-end;justify-content:center;padding:0 16px 18px;background:linear-gradient(#E4C4A4,#C4A07A);pointer-events:none}
-#race-load.on{display:flex}
-.race-load-card{width:min(260px,78%);background:rgba(251,248,240,.94);border:1px solid var(--ink);border-radius:12px;padding:10px 12px 12px}
-.race-load-bar{height:6px;border-radius:99px;background:var(--rule);overflow:hidden;margin-top:8px}
-#race-load-fill{height:100%;width:0;background:var(--orange);transition:width .15s linear}
-#race-fade{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0}
-#race-fade.on{animation:zonefade .62s ease forwards}
-@keyframes zonefade{0%{opacity:.8}100%{opacity:0}}
 </style>
 </head>
 <body>
@@ -181,11 +153,7 @@ body.stage-3d .racestage{overflow:hidden;touch-action:none;background:#D5DFEC}
 </div>
 <div id="viewrace" role="tabpanel" aria-labelledby="tabrace">
   <div class="racestage" id="racestage">
-    <button type="button" id="race-recenter" hidden>Recenter</button>
-    <div id="race-load"><div class="race-load-card"><div class="kicker">Setting the course</div><div class="race-load-bar"><div id="race-load-fill"></div></div></div></div>
-    <div id="race-fade"></div>
-    <canvas id="race-gl" hidden></canvas>
-    <div id="race-flat"><svg id="race-svg" viewBox="0 0 360 960" aria-hidden="true"></svg></div>
+    <div id="race-flat"><svg id="race-svg" viewBox="0 0 360 1048" aria-hidden="true"></svg></div>
   </div>
   <div class="racecard">
     <div class="racehead">
@@ -527,42 +495,150 @@ function publish(){
     vsLast:$("race-vs-last").textContent,
     kicker:$("race-kicker").textContent,
     clock:$("race-clock").textContent,
-    mode:document.body.classList.contains("stage-3d")?"3d":"2d",
-    anims:raceGL?raceGL.anims():null,
-    stride:raceGL?raceGL.stride():null,
-    world:raceGL?raceGL.world():null,
-    tris:raceGL?raceGL.tris():0
+    mode:"2d"
   };
 }
-function atFrac(frac){
-  const f=Math.max(0, Math.min(1, frac));
-  const d=f*course.L;
-  let lo=1, hi=course.cum.length-1;
-  while(lo<hi){
-    const mid=(lo+hi)>>1;
-    if(course.cum[mid]<d) lo=mid+1; else hi=mid;
-  }
-  const i=lo;
-  const span=course.cum[i]-course.cum[i-1]||1;
-  const u=Math.max(0, Math.min(1, (d-course.cum[i-1])/span));
-  const x=course.pts[i-1][0]+(course.pts[i][0]-course.pts[i-1][0])*u;
-  const y=course.pts[i-1][1]+(course.pts[i][1]-course.pts[i-1][1])*u;
-  const dx=course.pts[i][0]-course.pts[i-1][0];
-  const dy=course.pts[i][1]-course.pts[i-1][1];
+function pointOn(pts, u){
+  const f=Math.max(0, Math.min(1, u))*(pts.length-1);
+  const i=Math.min(pts.length-2, Math.floor(f));
+  const v=f-i;
+  const x=pts[i][0]+(pts[i+1][0]-pts[i][0])*v;
+  const y=pts[i][1]+(pts[i+1][1]-pts[i][1])*v;
+  const dx=pts[i+1][0]-pts[i][0], dy=pts[i+1][1]-pts[i][1];
   const len=Math.hypot(dx,dy)||1;
   return {x,y,dx,dy,nx:-dy/len,ny:dx/len};
 }
-function placeRunner(key){
-  const p=atFrac(shown[key]);
-  const off=key==="you"?-16:key==="last"?16:0;
-  const g=$("run-"+key);
-  g.setAttribute("transform","translate("+(p.x+p.nx*off).toFixed(2)+" "+(p.y+p.ny*off).toFixed(2)+")");
-  if(Math.abs(p.dx)>8) g.setAttribute("data-face", p.dx>=0?"1":"-1");
-  const s=g.getAttribute("data-face")==="-1"?-1:1;
-  const sc=key==="you"?1.42:1.28;
-  g.querySelector(".face").setAttribute("transform","scale("+(s*sc)+" "+sc+")");
-  if(raceGL) raceGL.place(key);
+function atFrac(frac){
+  const mi=Math.max(0, Math.min(TOTAL_MI, frac*TOTAL_MI));
+  let ti=3;
+  for(let i=0;i<4;i++){ if(mi<TRAILS[i].end-1e-6){ ti=i; break; } }
+  const t=TRAILS[ti];
+  const u=Math.max(0, Math.min(1, (mi-t.start)/(t.end-t.start||1)));
+  return Object.assign(pointOn(course.trails[ti], u), {ti, u});
 }
+function placeAll(){
+  if(!course) return;
+  const keys=["you","pace","last"];
+  const pts=keys.map(k=>Object.assign({k}, atFrac(shown[k])));
+  const parent=[0,1,2];
+  const find=a=>parent[a]===a?a:(parent[a]=find(parent[a]));
+  for(let i=0;i<3;i++) for(let j=i+1;j<3;j++){
+    if(Math.hypot(pts[i].x-pts[j].x, pts[i].y-pts[j].y)<58) parent[find(j)]=find(i);
+  }
+  const groups={};
+  pts.forEach((p,i)=>{(groups[find(i)]=groups[find(i)]||[]).push(i)});
+  Object.keys(groups).forEach(id=>{
+    const g=groups[id];
+    const order=["last","you","pace"].filter(k=>g.some(i=>pts[i].k===k));
+    g.forEach(i=>{
+      const p=pts[i];
+      const slot=order.indexOf(p.k);
+      const off=(slot-(order.length-1)/2)*54;
+      let x=p.x+p.nx*off, y=p.y+p.ny*off;
+      x=Math.max(40, Math.min(320, x));
+      const el=$("run-"+p.k);
+      el.setAttribute("transform","translate("+x.toFixed(1)+" "+y.toFixed(1)+")");
+      if(Math.abs(p.dx)>6) el.setAttribute("data-face", p.dx>=0?"1":"-1");
+      const face=el.getAttribute("data-face")==="-1"?-1:1;
+      el.querySelector(".body").setAttribute("transform","scale("+face+" 1)");
+      el.querySelector(".runner-steps").textContent=fmt(raceCur[p.k]);
+      const moving=raceCur.phase==="live"&&(raceCur[p.k]>40||!!jobs[p.k]);
+      el.classList.toggle("run", moving);
+    });
+  });
+  const zh=$("zonehit");
+  if(zh){
+    const y0=[0,262,524,786][atFrac(shown.you).ti];
+    zh.setAttribute("y", y0);
+    zh.setAttribute("height", "262");
+  }
+  nudgeLabels();
+}
+function nudgeLabels(){
+  const svg=$("race-svg");
+  const scale=svg.clientWidth/360;
+  if(!(scale>0)) return;
+  const keys=["you","pace","last"];
+  function pack(sel, y0, dir){
+    const nodes=keys.map(k=>({k, el:$("run-"+k).querySelector(sel), x:0, y:y0}));
+    const put=n=>n.el.setAttribute("transform","translate("+n.x.toFixed(1)+" "+n.y.toFixed(1)+")");
+    nodes.forEach(put);
+    for(let iter=0; iter<16; iter++){
+      let hit=false;
+      for(let i=0;i<nodes.length;i++) for(let j=i+1;j<nodes.length;j++){
+        const A=nodes[i].el.getBoundingClientRect();
+        const B=nodes[j].el.getBoundingClientRect();
+        const ox=Math.min(A.right,B.right)-Math.max(A.left,B.left);
+        const oy=Math.min(A.bottom,B.bottom)-Math.max(A.top,B.top);
+        if(ox<=1||oy<=1) continue;
+        hit=true;
+        const mover=nodes[i].k==="you"?nodes[j]:nodes[j].k==="you"?nodes[i]:nodes[j];
+        const other=mover===nodes[i]?nodes[j]:nodes[i];
+        const mr=mover.el.getBoundingClientRect();
+        const orr=other.el.getBoundingClientRect();
+        mover.y+=dir*(oy/scale+3);
+        const side=((mr.left+mr.right)>=(orr.left+orr.right)?1:-1);
+        mover.x+=side*Math.min(22, ox/scale+2);
+        if(dir<0&&mover.y<-96) mover.y=-96;
+        if(dir>0&&mover.y>42) mover.y=42;
+        put(mover);
+      }
+      if(!hit) break;
+    }
+    nodes.forEach(n=>clampNode(n.el, put));
+  }
+  function clampNode(el, put){
+    const svgR=svg.getBoundingClientRect();
+    for(let guard=0; guard<3; guard++){
+      const r=el.getBoundingClientRect();
+      let dx=0;
+      if(r.left<svgR.left+4) dx=(svgR.left+4-r.left)/scale;
+      else if(r.right>svgR.right-4) dx=(svgR.right-4-r.right)/scale;
+      else break;
+      const cur=readXY(el);
+      put({el, x:cur.x+dx, y:cur.y});
+    }
+  }
+  function readXY(el){
+    const m=(el.getAttribute("transform")||"").match(/-?[\d.]+/g)||["0","0"];
+    return {x:+m[0], y:+m[1]};
+  }
+  function overlap(A,B){
+    const ox=Math.min(A.right,B.right)-Math.max(A.left,B.left);
+    const oy=Math.min(A.bottom,B.bottom)-Math.max(A.top,B.top);
+    return (ox>1&&oy>1)?{ox,oy}:null;
+  }
+  pack(".tag", -58, -1);
+  pack(".stepsg", 18, 1);
+  const tags=keys.map(k=>$("run-"+k).querySelector(".tag"));
+  for(let iter=0; iter<12; iter++){
+    let hit=false;
+    keys.forEach((k,i)=>{
+      keys.forEach(other=>{
+        if(other===k) return;
+        [".stepsg",".body",".tag"].forEach(sel=>{
+          const A=tags[i].getBoundingClientRect();
+          const B=$("run-"+other).querySelector(sel).getBoundingClientRect();
+          const o=overlap(A,B);
+          if(!o) return;
+          hit=true;
+          const p=readXY(tags[i]);
+          if(sel===".tag") p.y-=o.oy/scale+3;
+          else {
+            const side=(A.left+A.right)>=(B.left+B.right)?1:-1;
+            p.x+=side*(o.ox/scale+6);
+          }
+          if(p.y<-120) p.y=-120;
+          tags[i].setAttribute("transform","translate("+p.x.toFixed(1)+" "+p.y.toFixed(1)+")");
+          clampNode(tags[i], n=>n.el.setAttribute("transform","translate("+n.x.toFixed(1)+" "+n.y.toFixed(1)+")"));
+        });
+      });
+    });
+    if(!hit) break;
+  }
+  keys.forEach(k=>clampNode($("run-"+k).querySelector(".stepsg"), n=>n.el.setAttribute("transform","translate("+n.x.toFixed(1)+" "+n.y.toFixed(1)+")")));
+}
+function placeRunner(){ placeAll(); }
 function settle(key){
   publish();
   if((key==="you"||!raceFramed)&&!jobs.you&&!jobs.pace&&!jobs.last){
@@ -578,33 +654,39 @@ function moveTo(key, frac, ms){
   if(jobs[key]){cancelAnimationFrame(jobs[key]); jobs[key]=0}
   const from=shown[key];
   if(Math.abs(frac-from)<1e-5||ms<=0||reduced()){
-    shown[key]=frac; placeRunner(key); el.classList.remove("run"); settle(key); return;
+    shown[key]=frac; placeAll(); settle(key); return;
   }
-  el.classList.add("run");
   const t0=performance.now(), ease=key==="you";
   const step=now=>{
     const u=Math.min(1,(now-t0)/ms);
     const e=ease?(u<0.5?2*u*u:1-Math.pow(-2*u+2,2)/2):u;
     shown[key]=from+(frac-from)*e;
-    placeRunner(key);
     if(u<1) jobs[key]=requestAnimationFrame(step);
-    else{jobs[key]=0; el.classList.remove("run"); settle(key)}
+    else jobs[key]=0;
+    placeAll();
+    if(u>=1) settle(key);
   };
   jobs[key]=requestAnimationFrame(step);
 }
 function frameRunners(retry){
-  if(document.body.classList.contains("stage-3d")) return;
   if(!course||!document.body.classList.contains("mode-race")) return;
   const stage=$("racestage"), svg=$("race-svg");
-  const w=svg.clientWidth;
-  if(!w){ if(!retry) requestAnimationFrame(()=>frameRunners(true)); return; }
-  const scale=w/360, h=stage.clientHeight;
-  if(!h) return;
-  const ys=["you","pace","last"].map(k=>atFrac(shown[k]).y*scale);
-  const top=Math.min.apply(null,ys)-36*scale, bot=Math.max.apply(null,ys)+48*scale;
-  const target=(bot-top<h)?(top+bot)/2-h/2:atFrac(shown.you).y*scale-h*0.42;
-  const max=Math.max(0, stage.scrollHeight-h);
-  stage.scrollTop=Math.max(0, Math.min(max, target));
+  if(!svg.clientWidth){ if(!retry) requestAnimationFrame(()=>frameRunners(true)); return; }
+  const s=stage.getBoundingClientRect();
+  if(s.height<40) return;
+  const boxes=["you","pace","last"].map(k=>$("run-"+k).getBoundingClientRect()).filter(b=>b.height>2);
+  if(!boxes.length) return;
+  const top=Math.min.apply(null, boxes.map(b=>b.top));
+  const bot=Math.max.apply(null, boxes.map(b=>b.bottom));
+  const pad=8;
+  let delta;
+  if(bot-top<s.height-pad*2){
+    delta=top-(s.top+pad);
+    const spare=(s.height-pad*2)-(bot-top);
+    if(spare>56) delta-=Math.min(48, spare-12);
+  }else delta=$("run-you").getBoundingClientRect().top-(s.top+s.height*0.36);
+  const max=Math.max(0, stage.scrollHeight-s.height);
+  stage.scrollTop=Math.max(0, Math.min(max, stage.scrollTop+delta));
 }
 function paint(kind){
   if(!raceReady) return;
@@ -618,7 +700,7 @@ function paint(kind){
   const yf=stepsToFrac(raceCur.you);
   if(kind==="you") moveTo("you", yf, reduced()?0:900);
   else if(!jobs.you&&Math.abs(shown.you-yf)>1e-4) moveTo("you", yf, reduced()?0:900);
-  else if(!jobs.you){shown.you=yf; placeRunner("you")}
+  else if(!jobs.you){shown.you=yf; placeAll()}
   publish();
 }
 function syncRace(steps){
@@ -646,159 +728,149 @@ function setTab(which){
   $("tablad").setAttribute("aria-selected", race?"false":"true");
   $("viewrace").setAttribute("aria-hidden", race?"false":"true");
   $("viewladder").setAttribute("aria-hidden", race?"true":"false");
-  if(race){requestAnimationFrame(()=>frameRunners(false)); if(raceGL) raceGL.resume();}
-  else if(raceGL) raceGL.pause();
+  if(race) requestAnimationFrame(()=>frameRunners(false));
 }
+function pix(rows, pal){
+  let s="";
+  rows.forEach((row,y)=>{
+    for(let x=0;x<row.length;x++){
+      const c=pal[row[x]];
+      if(!c) continue;
+      s+='<rect x="'+x+'" y="'+y+'" width="1.05" height="1.05" fill="'+c+'"/>';
+    }
+  });
+  return s;
+}
+const PX=3.3;
+const RUN_FRAMES={
+  you:{
+    a:["....HHHH....","...HSSSSHP..","...HSEESHP..","....SSSS....","...OOOOOOA..","..OOOOOOOO..","..OODDDDOOA.","....DDDD....","...DD..D....","..D.....D...","D.........D.","K.........K."],
+    b:["....HHHH....","...HSSSSHP..","...HSEESHP..","....SSSS....","..AOOOOOO...","..OOOOOOOO..",".AOODDDDOO..","....DDDD....","...D..DD....","..D.....D...","D.........D.",".K.........K"]
+  },
+  pace:{
+    a:["....HHHH....","...HSSSSH...","...HSEESH...","....SSSS....","...OOOOOOA..","..OOOOOOOO..","..OODDDDOOA.","....DDDD....","...DD..D....","..D.....D...","D.........D.","K.........K."],
+    b:["....HHHH....","...HSSSSH...","...HSEESH...","....SSSS....","..AOOOOOO...","..OOOOOOOO..",".AOODDDDOO..","....DDDD....","...D..DD....","..D.....D...","D.........D.",".K.........K"]
+  },
+  last:{
+    a:["...HHHHHH...","..HSSSSSSH..","..HSSEESSH..","..HSSSSSSH..","...OOOOOO...","..OOOOOOOO..","..OODDDDOO..","...DDDDD....","...DD..D....","..D.....D...","HHHHHHHHHHH.","..HHHHHHHH.."],
+    b:["...HHHHHH...","..HSSSSSSH..","..HSSEESSH..","..HSSSSSSH..","..AOOOOOO...","..OOOOOOOO..",".AOODDDDOO..","...DDDDD....","...D..DD....","..D.....D...","HHHHHHHHHHH.","..HHHHHHHH.."]
+  }
+};
 function runnerMarkup(kind){
-  const you=kind==="you", pace=kind==="pace", ghost=kind==="last";
-  const ink=ghost?"#8A8C80":"#1E2419";
-  const shirt=you?"#E8772E":pace?"#3B5B85":"#D5D6CE";
-  const skin=ghost?"#ECECE6":"#F6D7C3";
-  const hair=ghost?"#8A8C80":"#1E2419";
-  const token=you?"#E8772E":pace?"#3B5B85":"#8A8C80";
-  return `<g id="run-${kind}" class="runner ${ghost?"ghost":kind}" data-face="1">
-    <circle class="token" cx="0" cy="0" r="5.6" fill="#FBF8F0" stroke="${token}" stroke-width="2"/>
-    <ellipse cx="0" cy="3.2" rx="10" ry="3" fill="#1E2419" opacity="${ghost?0.06:0.12}"/>
-    <g class="face"><circle cx="0" cy="-20" r="16" fill="#FBF8F0" opacity="0.94"/><g class="bob">
-      <g class="leg a"><line x1="-3.3" y1="-15.5" x2="-3.3" y2="-1.2" stroke="${ink}" stroke-width="2.5" stroke-linecap="round"/></g>
-      <g class="leg b"><line x1="3.3" y1="-15.5" x2="3.3" y2="-1.2" stroke="${ink}" stroke-width="2.5" stroke-linecap="round"/></g>
-      <path d="M-7,-28.2 C-8.2,-18 -6.2,-15.2 -3.6,-15.2 L3.6,-15.2 C6.2,-15.2 8.2,-18 7,-28.2 C3.4,-25.4 0,-24.6 -7,-28.2 Z" fill="${shirt}" stroke="${ink}" stroke-width="1.1" stroke-linejoin="round"/>
-      <g class="arm a"><line x1="-6.2" y1="-26" x2="-6.2" y2="-16.5" stroke="${ink}" stroke-width="2.1" stroke-linecap="round"/></g>
-      <g class="arm b"><line x1="6.2" y1="-26" x2="6.2" y2="-16.5" stroke="${ink}" stroke-width="2.1" stroke-linecap="round"/></g>
-      ${pace?`<g class="flag"><line x1="10" y1="-20" x2="10" y2="-41" stroke="#243B5C" stroke-width="1.6" stroke-linecap="round"/><path d="M10,-41 L22,-36.6 L10,-32.4 Z" fill="#7C9A4E" stroke="#243B5C" stroke-width="0.7" stroke-linejoin="round"/></g>`:""}
-      <circle cx="0" cy="-33.2" r="6.3" fill="${skin}" stroke="${ink}" stroke-width="1.15"/>
-      <path d="M-5.3,-34.4 Q0,-40.6 5.3,-34.4 L4,-32.5 L-4,-32.5 Z" fill="${hair}"/>
-      ${you?`<path class="pony" d="M4.4,-34.2 C9.4,-33 12.6,-27.6 9.2,-22.8" fill="none" stroke="${hair}" stroke-width="2.2" stroke-linecap="round"/>`:""}
-      ${ghost?`<path d="M-6.4,-33 Q0,-42 6.4,-33 L5,-30.2 L-5,-30.2 Z" fill="#C8C9C0" stroke="${ink}" stroke-width="0.8"/>`:""}
-      <circle cx="-2.1" cy="-33.4" r="0.7" fill="${ink}"/>
-      <circle cx="2.1" cy="-33.4" r="0.7" fill="${ink}"/>
-    </g></g>
-  </g>`;
+  const meta={
+    you:{name:"You", w:50, stroke:"#E8772E", pal:{H:"#1E2419",S:"#F6D7C3",E:"#1E2419",O:"#E8772E",D:"#243B5C",A:"#F6D7C3",K:"#E8772E",P:"#1E2419"}},
+    pace:{name:"Pace", w:56, stroke:"#3B5B85", pal:{H:"#1E2419",S:"#F6D7C3",E:"#1E2419",O:"#3B5B85",D:"#1E2419",A:"#F6D7C3",K:"#1E2419"}},
+    last:{name:"Last chance", w:102, stroke:"#8A8C80", pal:{H:"#8A8C80",S:"#F7F7F2",E:"#4F5547",O:"#C8C9C0",D:"#8A8C80",A:"#F7F7F2"}}
+  }[kind];
+  const fr=RUN_FRAMES[kind];
+  const flag=kind==="pace"?'<g class="flag"><line x1="18" y1="-8" x2="18" y2="-40" stroke="#243B5C" stroke-width="1.7" stroke-linecap="round"/><path d="M18,-40 L34,-33 L18,-26 Z" fill="#7C9A4E" stroke="#243B5C" stroke-width="1" stroke-linejoin="round"/></g>':"";
+  return '<g id="run-'+kind+'" class="runner '+kind+(kind==="last"?" ghost":"")+'" data-face="1">'
+    +'<g class="tag" transform="translate(0 -58)"><rect x="'+(-meta.w/2)+'" y="-12" width="'+meta.w+'" height="18" rx="9" fill="#FBF8F0" stroke="'+meta.stroke+'" stroke-width="1.8"/><text class="runner-name" text-anchor="middle" y="2">'+meta.name+'</text></g>'
+    +'<g class="body"><circle cx="0" cy="-18" r="22" fill="#FBF8F0" stroke="'+meta.stroke+'" stroke-width="2.4"/>'
+    +'<g class="px" transform="translate('+(-6*PX)+' '+(-18-6*PX)+') scale('+PX+')"><g class="fr a">'+pix(fr.a, meta.pal)+'</g><g class="fr b">'+pix(fr.b, meta.pal)+'</g></g>'
+    +flag+'</g>'
+    +'<g class="stepsg" transform="translate(0 18)"><rect x="-33" y="-11" width="66" height="15" rx="7.5" fill="#FBF8F0" stroke="'+meta.stroke+'" stroke-width="1.3"/><text class="runner-steps" text-anchor="middle" y="1">0</text></g>'
+    +'</g>';
+}
+function chip(x, y, title, sub, w){
+  return '<g transform="translate('+x+' '+y+')"><rect width="'+w+'" height="36" rx="8" fill="#FBF8F0" stroke="#1E2419" stroke-width="1.4"/><text class="race-label" x="10" y="15">'+title+'</text><text class="race-note" x="10" y="28">'+sub+'</text></g>';
+}
+function routeStroke(d, accent, paved){
+  const base=paved?'#C9C2A8':'#1E2419';
+  const mid=paved?'#FBF8F0':'#FBF8F0';
+  const width=paved?18:16;
+  return '<path d="'+d+'" fill="none" stroke="'+base+'" stroke-width="'+width+'" stroke-linecap="round" stroke-linejoin="round"/>'
+    +'<path d="'+d+'" fill="none" stroke="'+mid+'" stroke-width="'+(paved?8:6)+'" stroke-linecap="round" stroke-linejoin="round"'+(paved?' stroke-dasharray="8 6"':'')+'/>'
+    +(paved?'':'<path d="'+d+'" fill="none" stroke="'+accent+'" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="1.5 9" opacity=".95"/>');
 }
 function buildCourse(){
-  const pts=[];
-  for(let i=0;i<=36;i++){
-    const t=i/36;
-    const y=868-t*748;
-    const x=180+Math.sin(t*Math.PI*2.5)*58+Math.sin(t*Math.PI*5+0.4)*8;
-    pts.push([Math.round(x*10)/10, Math.round(y*10)/10]);
-  }
-  const d=smoothPath(pts);
+  const pts=[
+    [[240,108],[300,156],[220,190],[124,172],[72,220],[150,250],[214,262]],
+    [[214,262],[300,322],[56,376],[300,428],[64,476],[176,504],[240,524]],
+    [[240,524],[150,582],[72,640],[156,690],[260,672],[300,728],[210,772],[188,786]],
+    [[188,786],[292,834],[176,892],[58,936],[148,978],[236,1004],[176,1032]]
+  ];
+  const d=pts.map(smoothPath);
+  const river=smoothPath([[0,70],[40,120],[96,96],[150,156],[108,208],[28,240],[0,262]]);
   const flat=$("race-flat");
-  flat.innerHTML=`<svg id="race-svg" viewBox="0 0 360 960"><path id="race-trail" d="${d}" fill="none"/></svg>`;
-  const trail=$("race-trail");
-  const L=trail.getTotalLength();
-  if(!(L>1)) throw new Error("course");
-  const n=800, samples=[], cum=[0];
-  let prev=trail.getPointAtLength(0);
-  samples.push([prev.x, prev.y]);
-  for(let i=1;i<=n;i++){
-    const p=trail.getPointAtLength(L*i/n);
-    samples.push([p.x, p.y]);
-    cum.push(cum[i-1]+Math.hypot(p.x-prev.x, p.y-prev.y));
-    prev=p;
+  flat.innerHTML='<svg id="race-svg" viewBox="0 0 360 1048" aria-hidden="true">'
+    +'<rect width="360" height="262" fill="#F4EEDF"/>'
+    +'<polygon points="300,0 360,0 360,262 268,262 292,190 246,120 292,48" fill="#F0C09A"/>'
+    +'<polygon points="328,0 360,0 360,262 312,262 336,168 304,72" fill="#E8772E"/>'
+    +'<polygon points="0,0 54,0 28,120 0,180" fill="#E8B898"/>'
+    +'<path d="'+river+'" fill="none" stroke="#243B5C" stroke-width="46" stroke-linecap="round"/>'
+    +'<path d="'+river+'" fill="none" stroke="#3B5B85" stroke-width="34" stroke-linecap="round"/>'
+    +'<path d="'+river+'" fill="none" stroke="#D5DFEC" stroke-width="8" stroke-linecap="round" opacity=".85"/>'
+    +'<g fill="#7C9A4E" stroke="#56702F" stroke-width="1.3"><circle cx="332" cy="78" r="13"/><circle cx="318" cy="88" r="9"/><circle cx="196" cy="46" r="11"/><circle cx="208" cy="56" r="8"/></g>'
+    +'<g stroke="#56702F" stroke-width="2" stroke-linecap="round"><line x1="326" y1="90" x2="326" y2="112"/><line x1="200" y1="56" x2="200" y2="74"/></g>'
+    +'<rect y="262" width="360" height="262" fill="#F8D3B4"/>'
+    +'<polygon points="0,262 78,262 36,400 0,524" fill="#C45A16"/>'
+    +'<polygon points="360,262 286,262 332,410 360,524" fill="#C45A16"/>'
+    +'<polygon points="150,430 268,400 292,524 132,524" fill="#F3C4A4"/>'
+    +'<polygon points="168,470 250,456 262,524 156,524" fill="#E8B898"/>'
+    +'<rect y="524" width="360" height="262" fill="#E6E2D6"/>'
+    +'<circle cx="292" cy="650" r="74" fill="#D4D0C4" stroke="#8A8C80" stroke-width="2"/>'
+    +'<path d="M292,590 Q318,640 292,700" fill="none" stroke="#FBF8F0" stroke-width="3" opacity=".7"/>'
+    +'<path d="M34,548 C48,610 18,690 40,786" fill="none" stroke="#243B5C" stroke-width="26" stroke-linecap="round"/>'
+    +'<path d="M34,548 C48,610 18,690 40,786" fill="none" stroke="#3B5B85" stroke-width="16" stroke-linecap="round"/>'
+    +'<path d="M34,548 C48,610 18,690 40,786" fill="none" stroke="#FBF8F0" stroke-width="4" stroke-linecap="round" opacity=".75"/>'
+    +'<g fill="#FBF8F0" opacity=".75"><circle cx="52" cy="640" r="3"/><circle cx="64" cy="662" r="2"/><circle cx="46" cy="678" r="2.4"/><circle cx="70" cy="700" r="1.8"/><circle cx="58" cy="724" r="2.6"/></g>'
+    +'<g fill="#56702F"><polygon points="108,700 122,652 136,700"/><polygon points="118,706 130,668 142,706"/><polygon points="210,612 222,574 234,612"/></g>'
+    +'<g fill="#243B5C"><rect x="119" y="700" width="4" height="12"/><rect x="127" y="706" width="3" height="10"/><rect x="218" y="612" width="4" height="10"/></g>'
+    +'<rect y="786" width="360" height="262" fill="#E4EFD2"/>'
+    +'<polygon points="0,786 360,786 360,846 250,820 140,858 40,816 0,848" fill="#7C9A4E"/>'
+    +'<polygon points="0,900 110,868 230,930 360,888 360,990 200,1010 40,960 0,1000" fill="#56702F" opacity=".28"/>'
+    +'<ellipse cx="250" cy="900" rx="90" ry="16" fill="#FBF8F0" opacity=".62"/>'
+    +'<ellipse cx="80" cy="960" rx="70" ry="12" fill="#FBF8F0" opacity=".5"/>'
+    +'<g fill="#D9D2BC" stroke="#1E2419" stroke-width="1.2"><rect x="300" y="868" width="28" height="16"/><rect x="304" y="860" width="6" height="10"/><rect x="316" y="856" width="5" height="14"/><rect x="24" y="948" width="22" height="14"/><rect x="28" y="940" width="5" height="10"/></g>'
+    +'<g transform="translate(176 1032)"><line x1="-18" y1="8" x2="-18" y2="-16" stroke="#E8772E" stroke-width="4" stroke-linecap="round"/><line x1="18" y1="8" x2="18" y2="-16" stroke="#E8772E" stroke-width="4" stroke-linecap="round"/><path d="M-18,-16 Q0,-36 18,-16" fill="none" stroke="#E8772E" stroke-width="4"/><text class="race-label" text-anchor="middle" x="46" y="-6">Sun Gate</text></g>'
+    +'<line x1="0" y1="262" x2="360" y2="262" stroke="#DCD4C0" stroke-width="2"/>'
+    +'<line x1="0" y1="524" x2="360" y2="524" stroke="#DCD4C0" stroke-width="2"/>'
+    +'<line x1="0" y1="786" x2="360" y2="786" stroke="#DCD4C0" stroke-width="2"/>'
+    +routeStroke(d[0], "#3B5B85", false)
+    +'<path id="tpath0" d="'+d[0]+'" fill="none" stroke="none"/>'
+    +routeStroke(d[1], "#E8772E", false)
+    +'<path id="tpath1" d="'+d[1]+'" fill="none" stroke="none"/>'
+    +routeStroke(d[2], "#56702F", false)
+    +'<path id="tpath2" d="'+d[2]+'" fill="none" stroke="none"/>'
+    +routeStroke(d[3], "#3B5B85", true)
+    +'<path id="tpath3" d="'+d[3]+'" fill="none" stroke="none"/>'
+    +chip(12, 12, "Riverside Walk", "Zion · start 4:00 AM", 168)
+    +chip(12, 274, "Angels Landing", "Switchbacks · 5.4 mi", 168)
+    +chip(12, 536, "Half Dome", "Mist Trail · 14.2 mi", 168)
+    +chip(12, 798, "Inca Trail", "Sun Gate · 26 mi", 156)
+    +'<rect id="zonehit" x="354" y="0" width="6" height="262" fill="#7C9A4E"/>'
+    +'<g id="runners">'+runnerMarkup("last")+runnerMarkup("pace")+runnerMarkup("you")+'</g>'
+    +'</svg>';
+  course={trails:[0,1,2,3].map(i=>{
+    const path=$("tpath"+i);
+    const L=path.getTotalLength();
+    const n=180, out=[];
+    for(let k=0;k<=n;k++){
+      const p=path.getPointAtLength(L*k/n);
+      out.push([p.x, p.y]);
+    }
+    return out;
+  })};
+  const runners=$("runners");
+  function side(ti,u0,u1,n,gap){
+    const pts=[];
+    for(let i=0;i<=n;i++){
+      const p=pointOn(course.trails[ti], u0+(u1-u0)*i/n);
+      pts.push({x:p.x+p.nx*gap, y:p.y+p.ny*gap});
+    }
+    return pts;
   }
-  course={pts:samples, cum, L:cum[n], pathL:L};
-  const miles=[0,2.2,7.6,21.8,47.8];
-  const cols=["#3B5B85","#E8772E","#7C9A4E","#243B5C"];
-  let segs="";
-  for(let i=0;i<4;i++){
-    const a=miles[i]/TOTAL_MI*L, b=miles[i+1]/TOTAL_MI*L;
-    segs+=`<path d="${d}" fill="none" stroke="${cols[i]}" stroke-width="8" stroke-linecap="butt" stroke-linejoin="round" stroke-dasharray="${(b-a).toFixed(2)} ${(L+8).toFixed(2)}" stroke-dashoffset="${(-a).toFixed(2)}"/>`;
-  }
-  segs+=`<path d="${d}" fill="none" stroke="#FBF8F0" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="1.5 8" opacity=".8"/>`;
-  const bits=[];
-  function nameCard(title, sub, p, id){
-    const w=Math.max(108, Math.ceil(title.length*7.15+22));
-    const left=p.x>=175;
-    const cx=left?14+w/2:346-w/2;
-    const cy=Math.max(70, Math.min(900, p.y));
-    const edge=left?cx+w/2:cx-w/2;
-    const idAttr=id?` id="${id}"`:"";
-    return `<line x1="${p.x.toFixed(1)}" y1="${p.y.toFixed(1)}" x2="${edge.toFixed(1)}" y2="${cy.toFixed(1)}" stroke="#8A8C80" stroke-width="1"/>
-      <g transform="translate(${cx.toFixed(1)} ${cy.toFixed(1)})"><rect x="${(-w/2).toFixed(1)}" y="-17" width="${w.toFixed(1)}" height="34" rx="8" fill="#FBF8F0" stroke="#1E2419"/><text class="race-label" text-anchor="middle" y="-2">${title}</text><text class="race-note" text-anchor="middle" y="12"${idAttr}>${sub}</text></g>`;
-  }
-  const start=atFrac(0), gate=atFrac(1);
-  bits.push(nameCard("Riverside","2.2 mi · 4 AM", start, "race-start-label"));
-  bits.push(`<g transform="translate(${gate.x.toFixed(1)} ${(gate.y-2).toFixed(1)})"><line x1="-14" y1="14" x2="-14" y2="-12" stroke="#243B5C" stroke-width="3" stroke-linecap="round"/><line x1="14" y1="14" x2="14" y2="-12" stroke="#243B5C" stroke-width="3" stroke-linecap="round"/><path d="M-14,-12 Q0,-30 14,-12" fill="none" stroke="#E8772E" stroke-width="3"/><text class="race-label" text-anchor="middle" x="0" y="-40">Sun Gate</text></g>`);
-  [2.2,7.6,21.8].forEach(mi=>{
-    const p=atFrac(mi/TOTAL_MI);
-    bits.push(`<line x1="${(p.x+p.nx*14).toFixed(1)}" y1="${(p.y+p.ny*14).toFixed(1)}" x2="${(p.x-p.nx*14).toFixed(1)}" y2="${(p.y-p.ny*14).toFixed(1)}" stroke="#1E2419" stroke-width="2.4" stroke-linecap="round"/>`);
+  const chain=side(1,0.7,0.98,5,18);
+  let marks='<path d="M'+chain.map(p=>p.x.toFixed(1)+","+p.y.toFixed(1)).join(" L")+'" fill="none" stroke="#243B5C" stroke-width="1.4" stroke-linecap="round"/>';
+  chain.forEach(p=>{ marks+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="2.4" fill="#FBF8F0" stroke="#243B5C" stroke-width="1.3"/>'; });
+  [14,24].forEach(gap=>{
+    const c=side(2,0.78,1,1,gap);
+    marks+='<line x1="'+c[0].x.toFixed(1)+'" y1="'+c[0].y.toFixed(1)+'" x2="'+c[1].x.toFixed(1)+'" y2="'+c[1].y.toFixed(1)+'" stroke="#1E2419" stroke-width="1.7" stroke-linecap="round"/>';
+    marks+='<rect x="'+(c[0].x-2).toFixed(1)+'" y="'+(c[0].y-3).toFixed(1)+'" width="4" height="7" fill="#1E2419"/>';
+    marks+='<rect x="'+(c[1].x-2).toFixed(1)+'" y="'+(c[1].y-3).toFixed(1)+'" width="4" height="7" fill="#1E2419"/>';
   });
-  [[4.9,"Angels Landing","5.4 mi"],[14.7,"Half Dome","14.2 mi"],[34.8,"Inca Trail","26.0 mi"]].forEach(item=>{
-    bits.push(nameCard(item[1], item[2], atFrac(item[0]/TOTAL_MI)));
-  });
-  [[13000,"13K"],[26000,"26K"],[39000,"39K"],[50000,"50K"],[63000,"63K"],[74000,"74K"],[85000,"85K"],[100000,"100K"]].forEach(f=>{
-    let frac=stepsToFrac(f[0]);
-    if(f[0]>=100000) frac=Math.min(frac,0.955);
-    const p=atFrac(frac);
-    const right=p.x<175;
-    const ox=right?20:-20;
-    const x=p.x+ox, y=p.y-16;
-    const dir=right?1:-1;
-    bits.push(`<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><line x1="0" y1="10" x2="0" y2="-14" stroke="#243B5C" stroke-width="1.5" stroke-linecap="round"/><path d="M0,-14 L${11*dir},-10.5 L0,-7 Z" fill="#E8772E"/><text class="race-flag" text-anchor="${dir>0?"start":"end"}" x="${dir>0?13:-13}" y="-6">${f[1]}</text></g>`);
-  });
-  flat.innerHTML=`<svg id="race-svg" viewBox="0 0 360 960" aria-hidden="true"><defs><linearGradient id="race-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D5DFEC"/><stop offset=".42" stop-color="#E7E4D8"/><stop offset=".72" stop-color="#F4EEDF"/><stop offset="1" stop-color="#E4EEF5"/></linearGradient></defs>
-  <rect width="360" height="960" fill="url(#race-sky)"/>
-  <circle cx="292" cy="40" r="16" fill="#FBF8F0" stroke="#E8772E" stroke-width="3"/>
-  <circle cx="292" cy="40" r="4.2" fill="#E8772E"/>
-  <path d="M0,168 L30,86 L62,146 L98,58 L136,132 L176,52 L214,128 L252,74 L292,138 L330,90 L360,146 L360,230 L0,230 Z" fill="#D5DFEC"/>
-  <path d="M0,214 L46,140 L86,198 L128,118 L170,196 L214,128 L262,194 L314,136 L360,186 L360,268 L0,268 Z" fill="#C5D4E8"/>
-  <path d="M0,268 L0,470 L52,420 L24,360 L58,312 L0,286 Z" fill="#D5DFEC"/>
-  <path d="M360,250 L360,500 L304,446 L336,372 L292,328 L338,270 Z" fill="#C9D6E6"/>
-  <path d="M238,640 C244,512 338,492 360,578 L360,676 L252,662 Z" fill="#E4ECD4" stroke="#7C9A4E" stroke-width="2.4" stroke-linejoin="round"/>
-  <path d="M304,560 Q334,516 354,566" fill="none" stroke="#56702F" stroke-width="2"/>
-  <path d="M0,748 L0,668 L50,702 L24,758 L62,824 L0,858 Z" fill="#F8D9C2"/>
-  <path d="M0,858 L40,918 L0,952 Z" fill="#F3C4A4"/>
-  <path d="M360,792 L306,752 L340,700 L286,678 L324,748 L272,792 L316,868 L360,910 Z" fill="#E8B898"/>
-  <path d="M0,888 C78,866 132,934 196,902 C258,872 308,934 360,906 L360,960 L0,960 Z" fill="#D5DFEC"/>
-  <path d="M18,928 C96,906 156,958 236,926 C286,906 324,948 348,934" fill="none" stroke="#3B5B85" stroke-width="2.6" stroke-linecap="round" opacity=".5"/>
-  <g fill="#7C9A4E" stroke="#56702F" stroke-width="1.2"><circle cx="46" cy="300" r="11"/><circle cx="318" cy="246" r="9"/><circle cx="38" cy="392" r="8"/><circle cx="322" cy="430" r="12"/></g>
-  <g stroke="#56702F" stroke-width="2" stroke-linecap="round"><line x1="46" y1="310" x2="46" y2="326"/><line x1="318" y1="254" x2="318" y2="268"/><line x1="38" y1="399" x2="38" y2="412"/><line x1="322" y1="441" x2="322" y2="458"/></g>
-  <path id="race-trail" d="${d}" fill="none" stroke="#1E2419" stroke-opacity=".2" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
-  ${segs}
-  ${bits.join("")}
-  <g id="runners">${runnerMarkup("last")}${runnerMarkup("pace")}${runnerMarkup("you")}</g>
-  </svg>`;
-}
-let raceGL=null;
-function boot3d(){
-  const canvas=$("race-gl");
-  if(!canvas) return;
-  const load=$("race-load");
-  load.classList.add("on");
-  import("./assets/race3d.js").then(mod=>mod.startRace3D({
-    canvas:canvas,
-    stage:$("racestage"),
-    recenterBtn:$("race-recenter"),
-    fade:$("race-fade"),
-    loadFill:$("race-load-fill"),
-    getShown:()=>shown,
-    getJobs:()=>jobs,
-    getRace:()=>raceCur,
-    reduced:reduced,
-    GOAL:GOAL,
-    publish:publish,
-    onReady(api){
-      raceGL=api;
-      window.raceGL=api;
-      $("viewrace")._gl=api;
-      document.body.classList.add("stage-3d");
-      canvas.hidden=false;
-      $("race-recenter").hidden=false;
-      ["you","pace","last"].forEach(api.place);
-      api.resize();
-      api.recenter();
-      api.renderOnce();
-      api.resume();
-      load.classList.remove("on");
-      publish();
-    },
-    onFail(){ load.classList.remove("on"); }
-  })).catch(e=>{
-    console.warn("Race 3D unavailable, using the flat course.", e);
-    load.classList.remove("on");
-  });
+  runners.insertAdjacentHTML("beforebegin", '<g id="marks">'+marks+"</g>");
 }
 function initRace(){
   $("tabrace").addEventListener("click",()=>setTab("race"));
@@ -812,11 +884,10 @@ function initRace(){
   setTab("race");
   paint("boot");
   setInterval(()=>{ if(raceReady) paint("tick"); }, 3000);
-  window.addEventListener("resize",()=>{ if(document.body.classList.contains("mode-race")&&!document.body.classList.contains("stage-3d")) frameRunners(false); });
-  boot3d();
+  window.addEventListener("resize",()=>{ if(document.body.classList.contains("mode-race")) frameRunners(false); });
 }
 buildPanels();render();poll();setInterval(poll,60000);
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)poll(); if(raceGL){ if(document.hidden) raceGL.pause(); else raceGL.resume(); }});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)poll();});
 const pubUrl="https://ntfy.sh/"+encodeURIComponent(TOPIC)+"/publish?message=";
 const pubField=$("puburl");
 pubField.value=pubUrl;
